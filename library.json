@@ -1,0 +1,26 @@
+{
+  "name": "OpenTherm",
+  "keywords": "OpenTherm, HVAC, Heating, Ventilation, Air Conditioning, Boiler",
+  "description": "OpenTherm Library for HVAC system control communication",
+  "url": "https://ihormelnyk.com/pages/OpenTherm",
+  "include": "OpenTherm",
+  "authors": [
+    {
+      "name": "Ihor Melnyk",
+      "url": "https://ihormelnyk.com",
+      "maintainer": true
+    }
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ihormelnyk/opentherm.git"
+  },
+  "frameworks": "arduino",
+  "platforms": [
+    "atmelavr",
+    "espressif"
+  ],
+  "examples": [
+    "examples/*/*.ino"
+  ]
+}
