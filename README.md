@@ -13,34 +13,34 @@ This version of library uses interrupts to achieve better stability and synchron
 - make custom thermostat
 
 ## Configuration and Usage:
-```
+```c
 #include <OpenTherm.h>
 ```
 You have to choose 2 controller GPIO pins which will be used for communication and connected to [OpenTherm Adapter](http://ihormelnyk.com/page/opentherm_adapter). Controller(Arduino/ESP8266) input pin should support interrupts.
 Controller output pin should be connected to OpenTherm Adapter input pin and vise versa.
-```
+```c
 const int inPin = 2;
 const int outPin = 3;
 ```
 Define OpenTherm class instance using constructor which accepts as arguments pin numbers:
-```
+```c
 OpenTherm ot(inPin, outPin);
 ```
 Define interrupts handler function for specified above instance:
-```
+```c
 void handleInterrupt() {
 	ot.handleInterrupt();
 }
 ```
 Use begin function to initialize OpenTherm instance, specify interrupts handler function as argument
-```
+```c
 void setup()
 {
     ot.begin(handleInterrupt);
 }
 ```
 According to OpenTherm Protocol specification master (controller) must communicate at least every 1 sec. So lets make some requests in loop function:
-```
+```c
 void loop()
 {	
     //Set/Get Boiler Status
