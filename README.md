@@ -62,4 +62,4 @@ In details [OpenTherm Library](http://ihormelnyk.com/page/opentherm_library) des
 ![opentherm adapter arduino](http://ihormelnyk.com/Content/Pages/opentherm_adapter/opentherm_adapter_arduino_connection.png)
 
 ## License
-Copyright (c) 2018 [Ihor Melnyk](https://ihormelnyk.com). Licensed under the [MIT license](/LICENSE?raw=true).
+Copyright (c) 2018 [Ihor Melnyk](http://ihormelnyk.com). Licensed under the [MIT license](/LICENSE?raw=true).
