@@ -4,7 +4,7 @@ This library provides implementation of OpenTherm protocol.
 
 OpenTherm Library is based on OpenTherm protocol specification v2.2 and works with all OpenTherm compatible boilers. Library can be easily installed into Arduino IDE and compiled for Arduino, ESP8266 and other similar controllers. 
 
-OpenTherm protocol requires simple low voltage twowire connection to boiler, but voltage levels (7..15V) still much higher than Arduino/ESP8266 levels, which requires [OpenTherm Adapter](http://ihormelnyk.com/page/opentherm_adapter).
+OpenTherm protocol requires simple low voltage twowire connection to boiler, but voltage levels (7..15V) still much higher than Arduino/ESP8266 levels, which requires [OpenTherm Adapter](http://ihormelnyk.com/opentherm_adapter).
 
 This version of library uses interrupts to achieve better stability and synchronization with boiler.
 
@@ -16,7 +16,7 @@ This version of library uses interrupts to achieve better stability and synchron
 ```c
 #include <OpenTherm.h>
 ```
-You have to choose 2 controller GPIO pins which will be used for communication and connected to [OpenTherm Adapter](http://ihormelnyk.com/page/opentherm_adapter). Controller(Arduino/ESP8266) input pin should support interrupts.
+You have to choose 2 controller GPIO pins which will be used for communication and connected to [OpenTherm Adapter](http://ihormelnyk.com/opentherm_adapter). Controller(Arduino/ESP8266) input pin should support interrupts.
 Controller output pin should be connected to OpenTherm Adapter input pin and vise versa.
 ```c
 const int inPin = 2;
@@ -53,7 +53,7 @@ void loop()
 }
 ```
 
-In details [OpenTherm Library](http://ihormelnyk.com/page/opentherm_library) described [here](http://ihormelnyk.com/page/opentherm_library).
+In details [OpenTherm Library](http://ihormelnyk.com/opentherm_library) described [here](http://ihormelnyk.com/opentherm_library).
 
 ## OpenTherm Adapter Schematic
 ![opentherm adapter schmetic](http://ihormelnyk.com/Content/Pages/opentherm_adapter/opentherm_adapter_schematic.png)
