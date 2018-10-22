@@ -62,14 +62,14 @@ enum OpenThermMessageID {
 	TflowCH2, // f8.8  Flow water temperature CH2 circuit (°C) 
 	Tdhw2, // f8.8  Domestic hot water temperature 2 (°C) 
 	Texhaust, // s16  Boiler exhaust temperature (°C) 
-	TdhwSetUBTdhwSetLB, // s8 / s8  DHW setpoint upper & lower bounds for adjustment  (°C) 
+	TdhwSetUBTdhwSetLB = 48, // s8 / s8  DHW setpoint upper & lower bounds for adjustment  (°C) 
 	MaxTSetUBMaxTSetLB, // s8 / s8  Max CH water setpoint upper & lower bounds for adjustment  (°C) 
 	HcratioUBHcratioLB, // s8 / s8  OTC heat curve ratio upper & lower bounds for adjustment  
-	TdhwSet, // f8.8  DHW setpoint (°C)    (Remote parameter 1) 
+	TdhwSet = 56, // f8.8  DHW setpoint (°C)    (Remote parameter 1) 
 	MaxTSet, // f8.8  Max CH water setpoint (°C)  (Remote parameters 2) 
 	Hcratio, // f8.8  OTC heat curve ratio (°C)  (Remote parameter 3) 
-	RemoteOverrideFunction, // flag8 / -  Function of manual and program changes in master and remote room setpoint. 
-	OEMDiagnosticCode, // u16  OEM-specific diagnostic/service code 
+	RemoteOverrideFunction = 100, // flag8 / -  Function of manual and program changes in master and remote room setpoint. 
+	OEMDiagnosticCode = 115, // u16  OEM-specific diagnostic/service code 
 	BurnerStarts, // u16  Number of starts burner 
 	CHPumpStarts, // u16  Number of starts CH pump 
 	DHWPumpValveStarts, // u16  Number of starts DHW pump/valve 
