@@ -8,12 +8,12 @@ Copyright 2018, Ihor Melnyk
 OpenTherm::OpenTherm(int inPin, int outPin):
 	inPin(inPin),
 	outPin(outPin),	
-	handleInterruptCallback(NULL),
-	processResponseCallback(NULL),
 	status(OpenThermStatus::NOT_INITIALIZED),	
 	response(0),
 	responseStatus(OpenThermResponseStatus::NONE),
-	responseTimestamp(0)	
+	responseTimestamp(0),
+	handleInterruptCallback(NULL),
+	processResponseCallback(NULL)
 {
 }
 
