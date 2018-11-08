@@ -29,14 +29,14 @@ enum OpenThermRequestType {
 
 enum OpenThermMessageID {
 	Status, // flag8 / flag8  Master and Slave Status flags. 
-	TSet, // f8.8  Control setpoint  ie CH  water temperature setpoint (캜) 
+	TSet, // f8.8  Control setpoint  ie CH  water temperature setpoint (째C)
 	MConfigMMemberIDcode, // flag8 / u8  Master Configuration Flags /  Master MemberID Code 
 	SConfigSMemberIDcode, // flag8 / u8  Slave Configuration Flags /  Slave MemberID Code 
 	Command, // u8 / u8  Remote Command 
 	ASFflags, // / OEM-fault-code  flag8 / u8  Application-specific fault flags and OEM fault code 
 	RBPflags, // flag8 / flag8  Remote boiler parameter transfer-enable & read/write flags 
 	CoolingControl, // f8.8  Cooling control signal (%) 
-	TsetCH2, // f8.8  Control setpoint for 2e CH circuit (캜) 
+	TsetCH2, // f8.8  Control setpoint for 2e CH circuit (째C)
 	TrOverride, // f8.8  Remote override room setpoint 
 	TSP, // u8 / u8  Number of Transparent-Slave-Parameters supported by slave 
 	TSPindexTSPvalue, // u8 / u8  Index number / Value of referred-to transparent slave parameter. 
@@ -44,30 +44,30 @@ enum OpenThermMessageID {
 	FHBindexFHBvalue, // u8 / u8  Index number / Value of referred-to fault-history buffer entry. 
 	MaxRelModLevelSetting, // f8.8  Maximum relative modulation level setting (%) 
 	MaxCapacityMinModLevel, // u8 / u8  Maximum boiler capacity (kW) / Minimum boiler modulation level(%) 
-	TrSet, // f8.8  Room Setpoint (캜) 
+	TrSet, // f8.8  Room Setpoint (째C)
 	RelModLevel, // f8.8  Relative Modulation Level (%) 
 	CHPressure, // f8.8  Water pressure in CH circuit  (bar) 
 	DHWFlowRate, // f8.8  Water flow rate in DHW circuit. (litres/minute) 
 	DayTime, // special / u8  Day of Week and Time of Day 
 	Date, // u8 / u8  Calendar date 
 	Year, // u16  Calendar year 
-	TrSetCH2, // f8.8  Room Setpoint for 2nd CH circuit (캜) 
-	Tr, // f8.8  Room temperature (캜) 
-	Tboiler, // f8.8  Boiler flow water temperature (캜) 
-	Tdhw, // f8.8  DHW temperature (캜) 
-	Toutside, // f8.8  Outside temperature (캜) 
-	Tret, // f8.8  Return water temperature (캜) 
-	Tstorage, // f8.8  Solar storage temperature (캜) 
-	Tcollector, // f8.8  Solar collector temperature (캜)  
-	TflowCH2, // f8.8  Flow water temperature CH2 circuit (캜) 
-	Tdhw2, // f8.8  Domestic hot water temperature 2 (캜) 
-	Texhaust, // s16  Boiler exhaust temperature (캜) 
-	TdhwSetUBTdhwSetLB = 48, // s8 / s8  DHW setpoint upper & lower bounds for adjustment  (캜) 
-	MaxTSetUBMaxTSetLB, // s8 / s8  Max CH water setpoint upper & lower bounds for adjustment  (캜) 
+	TrSetCH2, // f8.8  Room Setpoint for 2nd CH circuit (째C)
+	Tr, // f8.8  Room temperature (째C)
+	Tboiler, // f8.8  Boiler flow water temperature (째C)
+	Tdhw, // f8.8  DHW temperature (째C)
+	Toutside, // f8.8  Outside temperature (째C)
+	Tret, // f8.8  Return water temperature (째C)
+	Tstorage, // f8.8  Solar storage temperature (째C)
+	Tcollector, // f8.8  Solar collector temperature (째C)
+	TflowCH2, // f8.8  Flow water temperature CH2 circuit (째C)
+	Tdhw2, // f8.8  Domestic hot water temperature 2 (째C)
+	Texhaust, // s16  Boiler exhaust temperature (째C)
+	TdhwSetUBTdhwSetLB = 48, // s8 / s8  DHW setpoint upper & lower bounds for adjustment  (째C)
+	MaxTSetUBMaxTSetLB, // s8 / s8  Max CH water setpoint upper & lower bounds for adjustment  (째C)
 	HcratioUBHcratioLB, // s8 / s8  OTC heat curve ratio upper & lower bounds for adjustment  
-	TdhwSet = 56, // f8.8  DHW setpoint (캜)    (Remote parameter 1) 
-	MaxTSet, // f8.8  Max CH water setpoint (캜)  (Remote parameters 2) 
-	Hcratio, // f8.8  OTC heat curve ratio (캜)  (Remote parameter 3) 
+	TdhwSet = 56, // f8.8  DHW setpoint (째C)    (Remote parameter 1)
+	MaxTSet, // f8.8  Max CH water setpoint (째C)  (Remote parameters 2)
+	Hcratio, // f8.8  OTC heat curve ratio (째C)  (Remote parameter 3)
 	RemoteOverrideFunction = 100, // flag8 / -  Function of manual and program changes in master and remote room setpoint. 
 	OEMDiagnosticCode = 115, // u16  OEM-specific diagnostic/service code 
 	BurnerStarts, // u16  Number of starts burner 
