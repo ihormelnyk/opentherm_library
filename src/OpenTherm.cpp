@@ -68,8 +68,11 @@ bool OpenTherm::sendRequestAync(unsigned long request)
 {	
 	//Serial.println("Request: " + String(request, HEX));
 	noInterrupts();
-	if (!isReady()) return false;
+	const bool ready = isReady();
 	interrupts();
+
+	if (!ready)
+	  return false;
 
 	status = OpenThermStatus::REQUEST_SENDING;
 	response = 0;
