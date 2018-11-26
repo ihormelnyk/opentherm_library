@@ -13,6 +13,7 @@ P MGS-TYPE SPARE DATA-ID  DATA-VALUE
 #ifndef OpenTherm_h
 #define OpenTherm_h
 
+#include <stdint.h>
 #include <Arduino.h>
 
 enum OpenThermResponseStatus {
@@ -142,7 +143,9 @@ public:
 	bool isHotWaterEnabled(unsigned long response);
 	bool isFlameOn(unsigned long response);
 	bool isCoolingEnabled(unsigned long response);
-	bool isDiagnostic(unsigned long response);	
+	bool isDiagnostic(unsigned long response);
+	uint16_t getUInt(const unsigned long response) const;
+	float getFloat(const unsigned long response) const;
 	float getTemperature(unsigned long response);
 	unsigned int temperatureToData(float temperature);
 
