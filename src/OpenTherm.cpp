@@ -260,8 +260,19 @@ bool OpenTherm::isDiagnostic(unsigned long response) {
 	return response & 0x40;
 }
 
+uint16_t OpenTherm::getUInt(const unsigned long response) const {
+	const uint16_t u88 = response & 0xffff;
+	return u88;
+}
+
+float OpenTherm::getFloat(const unsigned long response) const {
+	const uint16_t u88 = getUInt(response);
+	const float f = (u88 & 0x8000) ? -(0x10000L - u88) / 256.0f : u88 / 256.0f;
+	return f;
+}
+
 float OpenTherm::getTemperature(unsigned long response) {
-	float temperature = isValidResponse(response) ? (response & 0xFFFF) / 256.0 : 0;
+	float temperature = isValidResponse(response) ? getFloat(response) : 0;
 	return temperature;
 }
 
