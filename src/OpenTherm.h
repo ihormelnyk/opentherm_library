@@ -116,7 +116,6 @@ private:
 
 	void sendBit(bool high);
 	bool parity(unsigned long frame);
-	bool isValidResponse(unsigned long response);
 	void(*handleInterruptCallback)();
 	void(*processResponseCallback)(unsigned long, OpenThermResponseStatus);
 public:	
@@ -138,6 +137,7 @@ public:
 	unsigned long buildGetBoilerTemperatureRequest();
 
 	//parsing responses
+	bool isValidResponse(unsigned long response);
 	bool isFault(unsigned long response);
 	bool isCentralHeatingEnabled(unsigned long response);
 	bool isHotWaterEnabled(unsigned long response);
