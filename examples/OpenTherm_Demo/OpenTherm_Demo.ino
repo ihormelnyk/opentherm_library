@@ -23,6 +23,8 @@ but since GPIO6-GPIO11 are typically used to interface with the flash memory ICs
 #include <Arduino.h>
 #include <OpenTherm.h>
 
+using namespace OT;
+
 const int inPin = 2; //4
 const int outPin = 3; //5
 OpenTherm ot(inPin, outPin);
