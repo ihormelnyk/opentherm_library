@@ -16,6 +16,8 @@ P MGS-TYPE SPARE DATA-ID  DATA-VALUE
 #include <stdint.h>
 #include <Arduino.h>
 
+namespace OT {
+
 enum OpenThermResponseStatus {
 	NONE,
 	SUCCESS,
@@ -154,5 +156,7 @@ public:
 	bool setBoilerTemperature(float temperature);
 	float getBoilerTemperature();
 };
+
+} // namespace OT
 
 #endif // OpenTherm_h
