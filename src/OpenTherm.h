@@ -23,6 +23,7 @@ enum OpenThermResponseStatus {
 	TIMEOUT
 };
 
+
 enum OpenThermMessageType {
 	/*  Master to Slave */
 	READ_DATA       = B000,
@@ -113,9 +114,9 @@ class OpenTherm
 {
 private:
 	const int inPin;
-	const int outPin;	
-
-	volatile OpenThermStatus status;
+	const int outPin;
+    const bool isSlave;
+	
 	volatile unsigned long response;
 	volatile OpenThermResponseStatus responseStatus;
 	volatile unsigned long responseTimestamp;
@@ -126,38 +127,44 @@ private:
 	void setIdleState();	
 	void activateBoiler();
 
-	void sendBit(bool high);
-	void(*handleInterruptCallback)();
-	void(*processResponseCallback)(unsigned long, OpenThermResponseStatus);
+    void sendBit(bool high);    
+    void(*handleInterruptCallback)();
+    void(*processResponseCallback)(unsigned long, OpenThermResponseStatus);
 public:	
-	OpenTherm(int inPin = 4, int outPin = 5);
+    volatile OpenThermStatus status;
+	OpenTherm(int inPin = 4, int outPin = 5, bool isSlave = false);
 	void begin(void(*handleInterruptCallback)(void));
 	void begin(void(*handleInterruptCallback)(void), void(*processResponseCallback)(unsigned long, OpenThermResponseStatus));
 	bool isReady();
 	unsigned long sendRequest(unsigned long request);
+    bool sendResponse(unsigned long request);
 	bool sendRequestAync(unsigned long request);
 	unsigned long buildRequest(OpenThermMessageType type, OpenThermMessageID id, unsigned int data);
+    unsigned long buildResponse(OpenThermMessageType type, OpenThermMessageID id, unsigned int data);
 	OpenThermResponseStatus getLastResponseStatus();
 	const char *statusToString(OpenThermResponseStatus status);
 	void handleInterrupt();	
 	void process();
 	void end();
-	OpenThermMessageType getMessageType(unsigned long message);
-	const char *messageTypeToString(OpenThermMessageType message_type);
-	bool parity(unsigned long frame);	
 
-	//building requests
+    bool parity(unsigned long frame);
+	OpenThermMessageType getMessageType(unsigned long message);
+    OpenThermMessageID getDataID(unsigned long frame);
+	const char *messageTypeToString(OpenThermMessageType message_type);
+    bool isValidRequest(unsigned long request);
+    bool isValidResponse(unsigned long response);
+
+	//requests
 	unsigned long buildSetBoilerStatusRequest(bool enableCentralHeating, bool enableHotWater = false, bool enableCooling = false, bool enableOutsideTemperatureCompensation = false, bool enableCentralHeating2 = false);
 	unsigned long buildSetBoilerTemperatureRequest(float temperature);
-	unsigned long buildGetBoilerTemperatureRequest();
+	unsigned long buildGetBoilerTemperatureRequest();    
 
-	//parsing responses
-	bool isValidResponse(unsigned long response);
+	//responses    
 	bool isFault(unsigned long response);
-	bool isCentralHeatingEnabled(unsigned long response);
-	bool isHotWaterEnabled(unsigned long response);
+	bool isCentralHeatingActive(unsigned long response);
+	bool isHotWaterActive(unsigned long response);
 	bool isFlameOn(unsigned long response);
-	bool isCoolingEnabled(unsigned long response);
+	bool isCoolingActive(unsigned long response);
 	bool isDiagnostic(unsigned long response);
 	uint16_t getUInt(const unsigned long response) const;
 	float getFloat(const unsigned long response) const;
