@@ -23,10 +23,22 @@ enum OpenThermResponseStatus {
 	TIMEOUT
 };
 
-enum OpenThermRequestType {
-	READ,
-	WRITE
+enum OpenThermMessageType {
+	/*  Master to Slave */
+	READ_DATA       = B000,
+	READ            = READ_DATA, // for backwared compatibility
+	WRITE_DATA      = B001,
+	WRITE           = WRITE_DATA, // for backwared compatibility
+	INVALID_DATA    = B010,
+	RESERVED        = B011,
+	/* Slave to Master */
+	READ_ACK        = B100,
+	WRITE_ACK       = B101,
+	DATA_INVALID    = B110,
+	UNKNOWN_DATA_ID = B111
 };
+
+typedef OpenThermMessageType OpenThermRequestType; // for backwared compatibility
 
 enum OpenThermMessageID {
 	Status, // flag8 / flag8  Master and Slave Status flags. 
@@ -115,7 +127,6 @@ private:
 	void activateBoiler();
 
 	void sendBit(bool high);
-	bool parity(unsigned long frame);
 	void(*handleInterruptCallback)();
 	void(*processResponseCallback)(unsigned long, OpenThermResponseStatus);
 public:	
@@ -125,11 +136,15 @@ public:
 	bool isReady();
 	unsigned long sendRequest(unsigned long request);
 	bool sendRequestAync(unsigned long request);
-	unsigned long buildRequest(OpenThermRequestType type, OpenThermMessageID id, unsigned int data);
+	unsigned long buildRequest(OpenThermMessageType type, OpenThermMessageID id, unsigned int data);
 	OpenThermResponseStatus getLastResponseStatus();
+	const char *statusToString(OpenThermResponseStatus status);
 	void handleInterrupt();	
 	void process();
 	void end();
+	OpenThermMessageType getMessageType(unsigned long message);
+	const char *messageTypeToString(OpenThermMessageType message_type);
+	bool parity(unsigned long frame);	
 
 	//building requests
 	unsigned long buildSetBoilerStatusRequest(bool enableCentralHeating, bool enableHotWater = false, bool enableCooling = false, bool enableOutsideTemperatureCompensation = false, bool enableCentralHeating2 = false);

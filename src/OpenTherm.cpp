@@ -194,10 +194,10 @@ bool OpenTherm::parity(unsigned long frame) //odd parity
 	return (p & 1);
 }
 
-unsigned long OpenTherm::buildRequest(OpenThermRequestType type, OpenThermMessageID id, unsigned int data)
+unsigned long OpenTherm::buildRequest(OpenThermMessageType type, OpenThermMessageID id, unsigned int data)
 {
 	unsigned long request = data;
-	if (type == OpenThermRequestType::WRITE) {
+	if (type == OpenThermMessageType::WRITE_DATA) {
 		request |= 1ul << 28;
 	}
 	request |= ((unsigned long)id) << 16;
@@ -209,7 +209,13 @@ bool OpenTherm::isValidResponse(unsigned long response)
 {
 	if (parity(response)) return false;
 	byte msgType = (response << 1) >> 29;
-	return msgType == 4 || msgType == 5; //4 - read, 5 - write
+	return msgType == READ_ACK || msgType == WRITE_ACK;
+}
+
+OpenThermMessageType OpenTherm::getMessageType(unsigned long message)
+{
+	OpenThermMessageType msg_type = static_cast<OpenThermMessageType>((message >> 28) & 7);
+	return msg_type;
 }
 
 void OpenTherm::end() {
@@ -218,21 +224,47 @@ void OpenTherm::end() {
 	}
 }
 
+const char *OpenTherm::statusToString(OpenThermResponseStatus status)
+{
+	switch (status) {
+		case NONE:    return "NONE";
+		case SUCCESS: return "SUCCESS";
+		case INVALID: return "INVALID";
+		case TIMEOUT: return "TIMEOUT";
+		default:      return "UNKNOWN";
+	}
+}
+
+const char *OpenTherm::messageTypeToString(OpenThermMessageType message_type)
+{
+	switch (message_type) {
+		case READ_DATA:       return "READ_DATA";
+		case WRITE_DATA:      return "WRITE_DATA";
+		case INVALID_DATA:    return "INVALID_DATA";
+		case RESERVED:        return "RESERVED";
+		case READ_ACK:        return "READ_ACK";
+		case WRITE_ACK:       return "WRITE_ACK";
+		case DATA_INVALID:    return "DATA_INVALID";
+		case UNKNOWN_DATA_ID: return "UNKNOWN_DATA_ID";
+		default:              return "UNKNOWN";
+	}
+}
+
 //building requests
 
 unsigned long OpenTherm::buildSetBoilerStatusRequest(bool enableCentralHeating, bool enableHotWater, bool enableCooling, bool enableOutsideTemperatureCompensation, bool enableCentralHeating2) {
 	unsigned int data = enableCentralHeating | (enableHotWater << 1) | (enableCooling << 2) | (enableOutsideTemperatureCompensation << 3) | (enableCentralHeating2 << 4);
 	data <<= 8;	
-	return buildRequest(OpenThermRequestType::READ, OpenThermMessageID::Status, data);
+	return buildRequest(OpenThermMessageType::READ_DATA, OpenThermMessageID::Status, data);
 }
 
 unsigned long OpenTherm::buildSetBoilerTemperatureRequest(float temperature) {
 	unsigned int data = temperatureToData(temperature);
-	return buildRequest(OpenThermRequestType::WRITE, OpenThermMessageID::TSet, data);
+	return buildRequest(OpenThermMessageType::WRITE_DATA, OpenThermMessageID::TSet, data);
 }
 
 unsigned long OpenTherm::buildGetBoilerTemperatureRequest() {
-	return buildRequest(OpenThermRequestType::READ, OpenThermMessageID::Tboiler, 0);
+	return buildRequest(OpenThermMessageType::READ_DATA, OpenThermMessageID::Tboiler, 0);
 }
 
 //parsing responses
