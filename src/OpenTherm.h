@@ -144,8 +144,7 @@ public:
 	void end();
 	OpenThermMessageType getMessageType(unsigned long message);
 	const char *messageTypeToString(OpenThermMessageType message_type);
-	bool parity(unsigned long frame);
-	bool isValidResponse(unsigned long response);
+	bool parity(unsigned long frame);	
 
 	//building requests
 	unsigned long buildSetBoilerStatusRequest(bool enableCentralHeating, bool enableHotWater = false, bool enableCooling = false, bool enableOutsideTemperatureCompensation = false, bool enableCentralHeating2 = false);
@@ -153,6 +152,7 @@ public:
 	unsigned long buildGetBoilerTemperatureRequest();
 
 	//parsing responses
+	bool isValidResponse(unsigned long response);
 	bool isFault(unsigned long response);
 	bool isCentralHeatingEnabled(unsigned long response);
 	bool isHotWaterEnabled(unsigned long response);
