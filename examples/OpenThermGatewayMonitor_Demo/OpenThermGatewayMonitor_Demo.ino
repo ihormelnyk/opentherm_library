@@ -1,18 +1,19 @@
 /*
-OpenTherm Monitor Example
+OpenTherm Gateway/Monitor Example
 By: Ihor Melnyk
 Date: May 1st, 2019
+http://ihormelnyk.com
 */
 
 
 #include <Arduino.h>
 #include <OpenTherm.h>
 
-const int mInPin = 4; //ESP8266
-const int mOutPin = 5;  //ESP8266
+const int mInPin = 2; //for Arduino, 4 for ESP8266
+const int mOutPin = 4; //for Arduino, 5 for ESP8266
 
-const int sInPin = 12;  //ESP8266
-const int sOutPin = 13;  //ESP8266
+const int sInPin = 3; //for Arduino, 12 for ESP8266
+const int sOutPin = 5; //for Arduino, 13 for ESP8266
 
 OpenTherm mOT(mInPin, mOutPin);
 OpenTherm sOT(sInPin, sOutPin, true);

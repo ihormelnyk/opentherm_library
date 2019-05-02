@@ -2,13 +2,14 @@
 OpenTherm Slave Example
 By: Ihor Melnyk
 Date: May 1st, 2019
+http://ihormelnyk.com
 */
 
 #include <Arduino.h>
 #include <OpenTherm.h>
 
-const int inPin = 12; //ESP8266
-const int outPin = 13; //ESP8266
+const int inPin = 2; //for Arduino, 12 for ESP8266
+const int outPin = 3; //for Arduino, 13 for ESP8266
 OpenTherm ot(inPin, outPin, true);
 
 void handleInterrupt() {

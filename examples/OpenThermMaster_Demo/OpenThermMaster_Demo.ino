@@ -23,8 +23,8 @@ but since GPIO6-GPIO11 are typically used to interface with the flash memory ICs
 #include <Arduino.h>
 #include <OpenTherm.h>
 
-const int inPin = 2; //4 for ESP8266
-const int outPin = 3; //5 dor ESP8266
+const int inPin = 2; //for Arduino, 4 for ESP8266
+const int outPin = 3; //for Arduino, 5 for ESP8266
 OpenTherm ot(inPin, outPin);
 
 void handleInterrupt() {
