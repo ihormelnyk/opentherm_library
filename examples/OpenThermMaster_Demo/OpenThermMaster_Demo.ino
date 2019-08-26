@@ -27,7 +27,7 @@ const int inPin = 2; //for Arduino, 4 for ESP8266
 const int outPin = 3; //for Arduino, 5 for ESP8266
 OpenTherm ot(inPin, outPin);
 
-void handleInterrupt() {
+void ICACHE_RAM_ATTR handleInterrupt() {
     ot.handleInterrupt();
 }
 

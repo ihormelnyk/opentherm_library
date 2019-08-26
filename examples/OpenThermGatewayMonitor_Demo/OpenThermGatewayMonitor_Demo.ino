@@ -18,11 +18,11 @@ const int sOutPin = 5; //for Arduino, 13 for ESP8266
 OpenTherm mOT(mInPin, mOutPin);
 OpenTherm sOT(sInPin, sOutPin, true);
 
-void mHandleInterrupt() {
+void ICACHE_RAM_ATTR mHandleInterrupt() {
     mOT.handleInterrupt();
 }
 
-void sHandleInterrupt() {
+void ICACHE_RAM_ATTR sHandleInterrupt() {
     sOT.handleInterrupt();
 }
 

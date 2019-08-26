@@ -177,4 +177,8 @@ public:
 	float getBoilerTemperature();
 };
 
+#ifndef ICACHE_RAM_ATTR
+#define ICACHE_RAM_ATTR
+#endif
+
 #endif // OpenTherm_h
