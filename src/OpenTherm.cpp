@@ -36,12 +36,12 @@ void OpenTherm::begin(void(*handleInterruptCallback)(void))
 	begin(handleInterruptCallback, NULL);	
 }
 
-bool OpenTherm::isReady()
+bool ICACHE_RAM_ATTR OpenTherm::isReady()
 {
 	return status == OpenThermStatus::READY;
 }
 
-int OpenTherm::readState() {
+int ICACHE_RAM_ATTR OpenTherm::readState() {
 	return digitalRead(inPin);
 }
 
@@ -122,7 +122,7 @@ OpenThermResponseStatus OpenTherm::getLastResponseStatus()
 	return responseStatus;
 }
 
-void OpenTherm::handleInterrupt()
+void ICACHE_RAM_ATTR OpenTherm::handleInterrupt()
 {	
     if (isReady())
     {
