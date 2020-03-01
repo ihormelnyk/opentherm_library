@@ -141,7 +141,7 @@ public:
 	unsigned long buildSetBoilerTemperatureRequest(float temperature);
 	unsigned long buildGetBoilerTemperatureRequest();   g
 
-	//responses   g
+	//responses
 	bool isFault(unsigned long response);
 	bool isCentralHeatingActive(unsigned long response);
 	bool isHotWaterActive(unsigned long response);
@@ -157,6 +157,10 @@ public:
 	unsigned long setBoilerStatus(bool enableCentralHeating, bool enableHotWater = false, bool enableCooling = false, bool enableOutsideTemperatureCompensation = false, bool enableCentralHeating2 = false);
 	bool setBoilerTemperature(float temperature);
 	float getBoilerTemperature();
+    float getRetTemperature();
+    float getModulation();
+    float getPressure();
+    unsigned char getFault();
 
 private:
 	const int inPin;

@@ -376,3 +376,22 @@ float OpenTherm::getBoilerTemperature() {
 	unsigned long response = sendRequest(buildGetBoilerTemperatureRequest());
 	return getTemperature(response);
 }
+
+float OpenTherm::getRetTemperature() {
+    unsigned long response = sendRequest(buildRequest(OpenThermRequestType::READ, OpenThermMessageID::Tret, 0));
+    return getTemperature(response);
+}
+
+float OpenTherm::getModulation() {
+    unsigned long response = sendRequest(buildRequest(OpenThermRequestType::READ, OpenThermMessageID::RelModLevel, 0));
+    return getTemperature(response);
+}
+
+float OpenTherm::getPressure() {
+    unsigned long response = sendRequest(buildRequest(OpenThermRequestType::READ, OpenThermMessageID::CHPressure, 0));
+    return getTemperature(response);
+}
+
+unsigned char OpenTherm::getFault() {
+    return ((sendRequest(buildRequest(OpenThermRequestType::READ, OpenThermMessageID::ASFflags, 0)) >> 8) & 0xff);
+}
