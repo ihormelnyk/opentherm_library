@@ -157,7 +157,7 @@ public:
 	unsigned long setBoilerStatus(bool enableCentralHeating, bool enableHotWater = false, bool enableCooling = false, bool enableOutsideTemperatureCompensation = false, bool enableCentralHeating2 = false);
 	bool setBoilerTemperature(float temperature);
 	float getBoilerTemperature();
-    float getRetTemperature();
+    float getReturnTemperature();
     float getModulation();
     float getPressure();
     unsigned char getFault();
@@ -181,5 +181,9 @@ private:
 	void(*handleInterruptCallback)();
 	void(*processResponseCallback)(unsigned long, OpenThermResponseStatus);
 };
+
+#ifndef ICACHE_RAM_ATTR
+#define ICACHE_RAM_ATTR
+#endif
 
 #endif // OpenTherm_h

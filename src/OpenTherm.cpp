@@ -36,12 +36,12 @@ void OpenTherm::begin(void(*handleInterruptCallback)(void))
 	begin(handleInterruptCallback, NULL);
 }
 
-bool OpenTherm::isReady()
+bool ICACHE_RAM_ATTR OpenTherm::isReady()
 {
 	return status == OpenThermStatus::READY;
 }
 
-int OpenTherm::readState() {
+int ICACHE_RAM_ATTR OpenTherm::readState() {
 	return digitalRead(inPin);
 }
 
@@ -122,7 +122,7 @@ OpenThermResponseStatus OpenTherm::getLastResponseStatus()
 	return responseStatus;
 }
 
-void OpenTherm::handleInterrupt()
+void ICACHE_RAM_ATTR OpenTherm::handleInterrupt()
 {
 	if (isReady())
 	{
@@ -349,11 +349,6 @@ float OpenTherm::getFloat(const unsigned long response) const {
 	return f;
 }
 
-float OpenTherm::getTemperature(unsigned long response) {
-	float temperature = isValidResponse(response) ? getFloat(response) : 0;
-	return temperature;
-}
-
 unsigned int OpenTherm::temperatureToData(float temperature) {
 	if (temperature < 0) temperature = 0;
 	if (temperature > 100) temperature = 100;
@@ -374,22 +369,22 @@ bool OpenTherm::setBoilerTemperature(float temperature) {
 
 float OpenTherm::getBoilerTemperature() {
 	unsigned long response = sendRequest(buildGetBoilerTemperatureRequest());
-	return getTemperature(response);
+	return isValidResponse(response) ? getFloat(response) : 0;
 }
 
-float OpenTherm::getRetTemperature() {
+float OpenTherm::getReturnTemperature() {
     unsigned long response = sendRequest(buildRequest(OpenThermRequestType::READ, OpenThermMessageID::Tret, 0));
-    return getTemperature(response);
+    return isValidResponse(response) ? getFloat(response) : 0;
 }
 
 float OpenTherm::getModulation() {
     unsigned long response = sendRequest(buildRequest(OpenThermRequestType::READ, OpenThermMessageID::RelModLevel, 0));
-    return getTemperature(response);
+    return isValidResponse(response) ? getFloat(response) : 0;
 }
 
 float OpenTherm::getPressure() {
     unsigned long response = sendRequest(buildRequest(OpenThermRequestType::READ, OpenThermMessageID::CHPressure, 0));
-    return getTemperature(response);
+    return isValidResponse(response) ? getFloat(response) : 0;
 }
 
 unsigned char OpenTherm::getFault() {
