@@ -149,8 +149,7 @@ public:
 	bool isCoolingActive(unsigned long response);
 	bool isDiagnostic(unsigned long response);
 	uint16_t getUInt(const unsigned long response) const;
-	float getFloat(const unsigned long response) const;
-	float getTemperature(unsigned long response);
+	float getFloat(const unsigned long response) const;	
 	unsigned int temperatureToData(float temperature);
 
 	//basic requests
