@@ -377,6 +377,17 @@ float OpenTherm::getReturnTemperature() {
     return isValidResponse(response) ? getFloat(response) : 0;
 }
 
+bool OpenTherm::setDHWSetpoint(float temperature) {
+    unsigned int data = temperatureToData(temperature);
+    unsigned long response = sendRequest(buildRequest(OpenThermMessageType::WRITE_DATA, OpenThermMessageID::TdhwSet, data));
+    return isValidResponse(response);
+}
+    
+float OpenTherm::getDHWTemperature() {
+    unsigned long response = sendRequest(buildRequest(OpenThermMessageType::READ_DATA, OpenThermMessageID::Tdhw, 0));
+    return isValidResponse(response) ? getFloat(response) : 0;
+}
+
 float OpenTherm::getModulation() {
     unsigned long response = sendRequest(buildRequest(OpenThermRequestType::READ, OpenThermMessageID::RelModLevel, 0));
     return isValidResponse(response) ? getFloat(response) : 0;
