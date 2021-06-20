@@ -82,6 +82,24 @@ enum OpenThermMessageID {
 	TdhwSet = 56, // f8.8  DHW setpoint (°C)    (Remote parameter 1)
 	MaxTSet, // f8.8  Max CH water setpoint (°C)  (Remote parameters 2)
 	Hcratio, // f8.8  OTC heat curve ratio (°C)  (Remote parameter 3)
+
+	// Ventilation Specific Message IDs
+	VentStatus = 70, // flag8 / flag8  Master and Slave Status flags specific to Vent systems
+	VentNomVentSet, // _ / u8 Set the relative ventilation 0-100%
+	VentFault, // flag8 / flag8 Application specific fault flags
+	VentOEMFault, // flag8 / flag8 Oem specific fault flags
+	VentSlaveVentConfig = 74, // Slave Configuration Flags /  Slave MemberID Code
+	VentNomVent = 77, // _ / u8 Read the relative ventilation 0-100%
+	VentRelHumid, // _ / u8 Read the relative humidity 0-100%
+	VentCO2level, // u16 CO2 level in PPM (0-2000)
+	VentTsupplyin, // f8.8 Supply Outlet temperature
+	VentTsupplyout, // f8.8 Supply Outlet temperature
+	VentTexhaustin,// f8.8 Exhaust Inlet temperature
+	VentTexhaustout, // f8.8 Exhaust Outlet temperature
+	VentRPMexhaust, // u16 Actual RPM for inlet fan
+	VentRPMsupply, // u16 Actual RPM for supply fan
+	VentNomRelVent = 87, // _ / u8 Get the current relative ventilation
+
 	RemoteOverrideFunction = 100, // flag8 / -  Function of manual and program changes in master and remote room setpoint.
 	OEMDiagnosticCode = 115, // u16  OEM-specific diagnostic/service code
 	BurnerStarts, // u16  Number of starts burner
@@ -161,6 +179,21 @@ public:
     float getModulation();
     float getPressure();
     unsigned char getFault();
+
+	//Ventilation systems requests
+	unsigned int getVentilation();
+	unsigned int setVentilation(unsigned int nominal_value);
+	float getVentSupplyInTemperature();
+	float getVentSupplyOutTemperature();
+	float getVentExhaustInTemperature();
+	float getVentExhaustOutTemperature();
+
+	bool getFaultIndication();
+	bool getVentilationMode();
+	bool getBypassStatus();
+	bool getBypassAutomaticStatus();
+	bool getDiagnosticIndication();
+
 
 private:
 	const int inPin;

@@ -390,3 +390,76 @@ float OpenTherm::getPressure() {
 unsigned char OpenTherm::getFault() {
     return ((sendRequest(buildRequest(OpenThermRequestType::READ, OpenThermMessageID::ASFflags, 0)) >> 8) & 0xff);
 }
+
+unsigned int OpenTherm::getVentilation() {
+	unsigned long response = sendRequest(buildRequest(OpenThermRequestType::READ, OpenThermMessageID::VentNomVent, 0));
+	return isValidResponse(response) ? getUInt(response) : 0;
+}
+
+/** Setting the nominal ventilation, clamps to the range 0-100
+ * Some ventilation systems have special values for nominal value 0,1,2,3
+ */
+unsigned int OpenTherm::setVentilation(unsigned int nominal_value) {
+	if (nominal_value < 0) nominal_value = 0;
+	if (nominal_value > 100) nominal_value = 100;
+	unsigned long response = sendRequest(buildRequest(OpenThermRequestType::WRITE, OpenThermMessageID::VentNomVentSet, nominal_value));
+	return isValidResponse(response) ? getUInt(response) : 0;
+}
+
+/**
+ * Temperature getting functions for Vent systems
+ * Often respond with temperature '80' when the sensors aren't available
+ */
+float OpenTherm::getVentSupplyInTemperature() {
+	unsigned long response = sendRequest(
+		buildRequest(OpenThermRequestType::READ, OpenThermMessageID::VentTsupplyin, 0));
+	return isValidResponse(response) ? getFloat(response) : 0;
+}
+
+float OpenTherm::getVentSupplyOutTemperature() {
+	unsigned long response = sendRequest(
+		buildRequest(OpenThermRequestType::READ, OpenThermMessageID::VentTsupplyout, 0));
+	return isValidResponse(response) ? getFloat(response) : 0;
+}
+
+float OpenTherm::getVentExhaustInTemperature() {
+	unsigned long response = sendRequest(
+		buildRequest(OpenThermRequestType::READ, OpenThermMessageID::VentTexhaustin, 0));
+	return isValidResponse(response) ? getFloat(response) : 0;
+}
+
+float OpenTherm::getVentExhaustOutTemperature() {
+	unsigned long response = sendRequest(
+		buildRequest(OpenThermRequestType::READ, OpenThermMessageID::VentTexhaustout, 0));
+	return isValidResponse(response) ? getFloat(response) : 0;
+}
+
+bool OpenTherm::getFaultIndication() {
+	unsigned long response = sendRequest(buildRequest(
+		OpenThermRequestType::READ, OpenThermMessageID::VentStatus,0));
+	return isValidResponse(response)? (getUInt(response) & 0x1) : 0;
+}
+
+bool OpenTherm::getVentilationMode() {
+	unsigned long response = sendRequest(buildRequest(
+		OpenThermRequestType::READ, OpenThermMessageID::VentStatus,0));
+	return isValidResponse(response) ? (getUInt(response) & 0x2) >> 1: 0;
+}
+
+bool OpenTherm::getBypassStatus() {
+	unsigned long response = sendRequest(buildRequest(
+		OpenThermRequestType::READ, OpenThermMessageID::VentStatus,0));
+	return isValidResponse(response) ? (getUInt(response) & 0x4) >> 2: 0;
+}
+
+bool OpenTherm::getBypassAutomaticStatus() {
+	unsigned long response = sendRequest(buildRequest(
+		OpenThermRequestType::READ, OpenThermMessageID::VentStatus,0));
+	return isValidResponse(response) ? (getUInt(response) & 0x8) >> 3: 0;
+}
+
+bool OpenTherm::getDiagnosticIndication() {
+	unsigned long response = sendRequest(buildRequest(
+		OpenThermRequestType::READ, OpenThermMessageID::VentStatus,0));
+	return isValidResponse(response)? (getUInt(response) & 0x20) >> 5: 0;
+}
