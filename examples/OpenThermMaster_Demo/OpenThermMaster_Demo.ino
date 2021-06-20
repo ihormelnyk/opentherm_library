@@ -23,8 +23,8 @@ but since GPIO6-GPIO11 are typically used to interface with the flash memory ICs
 #include <Arduino.h>
 #include <OpenTherm.h>
 
-const int inPin = 2; //for Arduino, 4 for ESP8266
-const int outPin = 3; //for Arduino, 5 for ESP8266
+const int inPin = 2;  //for Arduino, 4 for ESP8266 (D2), 21 for ESP32
+const int outPin = 3; //for Arduino, 5 for ESP8266 (D1), 22 for ESP32
 OpenTherm ot(inPin, outPin);
 
 void ICACHE_RAM_ATTR handleInterrupt() {
@@ -66,8 +66,15 @@ void loop()
     ot.setBoilerTemperature(64);
 
     //Get Boiler Temperature
-    float temperature = ot.getBoilerTemperature();
-    Serial.println("Boiler temperature is " + String(temperature) + " degrees C");
+    float ch_temperature = ot.getBoilerTemperature();
+    Serial.println("CH temperature is " + String(ch_temperature) + " degrees C");
+
+    //Set DHW setpoint to 40 degrees C
+    ot.setDHWSetpoint(40);
+
+    //Get DHW Temperature
+    float dhw_temperature = ot.getDHWTemperature();
+    Serial.println("DHW temperature is " + String(dhw_temperature) + " degrees C");
 
     Serial.println();
     delay(1000);

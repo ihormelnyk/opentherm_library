@@ -167,8 +167,7 @@ public:
 	bool isCoolingActive(unsigned long response);
 	bool isDiagnostic(unsigned long response);
 	uint16_t getUInt(const unsigned long response) const;
-	float getFloat(const unsigned long response) const;
-	float getTemperature(unsigned long response);
+	float getFloat(const unsigned long response) const;	
 	unsigned int temperatureToData(float temperature);
 
 	//basic requests
@@ -176,6 +175,8 @@ public:
 	bool setBoilerTemperature(float temperature);
 	float getBoilerTemperature();
     float getReturnTemperature();
+    bool setDHWSetpoint(float temperature);
+    float getDHWTemperature();
     float getModulation();
     float getPressure();
     unsigned char getFault();
