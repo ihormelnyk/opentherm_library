@@ -68,13 +68,11 @@ void OpenTherm::sendBit(bool high) {
 bool OpenTherm::sendRequestAync(unsigned long request)
 {
 	//Serial.println("Request: " + String(request, HEX));
-	noInterrupts();
 	const bool ready = isReady();
-	interrupts();
-
 	if (!ready)
 	  return false;
-
+	
+	noInterrupts();
 	status = OpenThermStatus::REQUEST_SENDING;
 	response = 0;
 	responseStatus = OpenThermResponseStatus::NONE;
@@ -88,6 +86,7 @@ bool OpenTherm::sendRequestAync(unsigned long request)
 
 	status = OpenThermStatus::RESPONSE_WAITING;
 	responseTimestamp = micros();
+	interrupts();
 	return true;
 }
 
