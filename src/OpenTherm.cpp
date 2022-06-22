@@ -117,6 +117,11 @@ bool OpenTherm::sendResponse(unsigned long request)
 	return true;
 }
 
+unsigned long OpenTherm::getLastResponse()
+{
+	return response;
+}
+
 OpenThermResponseStatus OpenTherm::getLastResponseStatus()
 {
 	return responseStatus;
