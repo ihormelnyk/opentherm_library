@@ -184,8 +184,8 @@ private:
 	void(*processResponseCallback)(unsigned long, OpenThermResponseStatus);
 };
 
-#ifndef ICACHE_RAM_ATTR
-#define ICACHE_RAM_ATTR
+#ifndef IRAM_ATTR
+#define IRAM_ATTR
 #endif
 
 #endif // OpenTherm_h
