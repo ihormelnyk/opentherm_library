@@ -12,7 +12,7 @@ const int inPin = 2;  //for Arduino, 12 for ESP8266 (D6), 19 for ESP32
 const int outPin = 3; //for Arduino, 13 for ESP8266 (D7), 23 for ESP32
 OpenTherm ot(inPin, outPin, true);
 
-void ICACHE_RAM_ATTR handleInterrupt() {
+void IRAM_ATTR handleInterrupt() {
     ot.handleInterrupt();
 }
 
