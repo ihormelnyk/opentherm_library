@@ -188,4 +188,8 @@ private:
 #define ICACHE_RAM_ATTR
 #endif
 
+#ifndef IRAM_ATTR
+#define IRAM_ATTR ICACHE_RAM_ATTR
+#endif
+
 #endif // OpenTherm_h
