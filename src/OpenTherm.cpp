@@ -249,7 +249,7 @@ unsigned long OpenTherm::buildRequest(OpenThermMessageType type, OpenThermMessag
 unsigned long OpenTherm::buildResponse(OpenThermMessageType type, OpenThermMessageID id, unsigned int data)
 {
 	unsigned long response = data;
-	response |= type << 28;
+	response |= ((unsigned long)type) << 28;
 	response |= ((unsigned long)id) << 16;
 	if (parity(response)) response |= (1ul << 31);
 	return response;
