@@ -28,8 +28,8 @@ void processRequest(unsigned long request, OpenThermResponseStatus status) {
       case OpenThermMessageID::Status:
       {
         uint8_t statusRequest = data >> 8;
-        uint8_t chEnable = statusRequest && 0x1;
-        uint8_t dhwEnable = statusRequest && 0x2;
+        uint8_t chEnable = statusRequest & 0x1;
+        uint8_t dhwEnable = statusRequest & 0x2;
         data &= 0xFF00;
         //data |= 0x01; //fault indication
         if (chEnable) data |= 0x02; //CH active
