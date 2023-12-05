@@ -70,7 +70,6 @@ bool OpenTherm::sendRequestAync(unsigned long request)
 	//Serial.println("Request: " + String(request, HEX));
 	noInterrupts();
 	const bool ready = isReady();
-	interrupts();
 
 	if (!ready)
 	  return false;
@@ -88,6 +87,7 @@ bool OpenTherm::sendRequestAync(unsigned long request)
 
 	status = OpenThermStatus::RESPONSE_WAITING;
 	responseTimestamp = micros();
+	interrupts();
 	return true;
 }
 
@@ -141,13 +141,15 @@ void IRAM_ATTR OpenTherm::handleInterrupt()
 
 	unsigned long newTs = micros();
 	if (status == OpenThermStatus::RESPONSE_WAITING) {
-		if (readState() == HIGH) {
-			status = OpenThermStatus::RESPONSE_START_BIT;
-			responseTimestamp = newTs;
-		}
-		else {
-			status = OpenThermStatus::RESPONSE_INVALID;
-			responseTimestamp = newTs;
+		if ((newTs - responseTimestamp) > 20000) {
+			if (readState() == HIGH) {
+				status = OpenThermStatus::RESPONSE_START_BIT;
+				responseTimestamp = newTs;
+			}
+			else {
+				status = OpenThermStatus::RESPONSE_INVALID;
+				responseTimestamp = newTs;
+			}
 		}
 	}
 	else if (status == OpenThermStatus::RESPONSE_START_BIT) {
@@ -155,6 +157,7 @@ void IRAM_ATTR OpenTherm::handleInterrupt()
 			status = OpenThermStatus::RESPONSE_RECEIVING;
 			responseTimestamp = newTs;
 			responseBitIndex = 0;
+			response = 0;
 		}
 		else {
 			status = OpenThermStatus::RESPONSE_INVALID;
