@@ -188,7 +188,7 @@ void OpenTherm::process()
 
 	if (st == OpenThermStatus::READY) return;
 	unsigned long newTs = micros();
-	if (st != OpenThermStatus::NOT_INITIALIZED && st != OpenThermStatus::DELAY && (newTs - ts) > 1000000) {
+	if (st != OpenThermStatus::NOT_INITIALIZED && st != OpenThermStatus::RESPONSE_READY && st != OpenThermStatus::DELAY && (newTs - ts) > 1000000) {
 		status = OpenThermStatus::READY;
 		responseStatus = OpenThermResponseStatus::TIMEOUT;
 		if (processResponseCallback != NULL) {
