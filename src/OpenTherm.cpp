@@ -71,8 +71,10 @@ bool OpenTherm::sendRequestAync(unsigned long request)
 	noInterrupts();
 	const bool ready = isReady();
 
-	if (!ready)
-	  return false;
+	if (!ready) {
+		interrupts();
+		return false;
+	}
 
 	status = OpenThermStatus::REQUEST_SENDING;
 	response = 0;
