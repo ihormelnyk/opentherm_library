@@ -134,6 +134,7 @@ public:
 	OpenThermMessageType getMessageType(unsigned long message);
 	OpenThermMessageID getDataID(unsigned long frame);
 	const char *messageTypeToString(OpenThermMessageType message_type);
+	const char *stautsToString(OpenThermStatus status);
 	bool isValidRequest(unsigned long request);
 	bool isValidResponse(unsigned long response);
 

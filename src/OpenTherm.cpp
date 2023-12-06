@@ -67,13 +67,14 @@ void OpenTherm::sendBit(bool high) {
 
 bool OpenTherm::sendRequestAync(unsigned long request)
 {
-	//Serial.println("Request: " + String(request, HEX));
+	Serial.println("sendRequestAync currentStatus:("+String(stautsToString(status))+") Request: (" + String(request, HEX)+") HEX");
 	noInterrupts();
 	const bool ready = isReady();
-	interrupts();
 
-	if (!ready)
-	  return false;
+	if (!ready) {
+		interrupts();
+		return false;
+    }
 
 	status = OpenThermStatus::REQUEST_SENDING;
 	response = 0;
@@ -88,11 +89,12 @@ bool OpenTherm::sendRequestAync(unsigned long request)
 
 	status = OpenThermStatus::RESPONSE_WAITING;
 	responseTimestamp = micros();
+	interrupts();
 	return true;
 }
 
 unsigned long OpenTherm::sendRequest(unsigned long request)
-{
+{	
 	if (!sendRequestAync(request)) return 0;
 	while (!isReady()) {
 		process();
@@ -141,13 +143,15 @@ void IRAM_ATTR OpenTherm::handleInterrupt()
 
 	unsigned long newTs = micros();
 	if (status == OpenThermStatus::RESPONSE_WAITING) {
-		if (readState() == HIGH) {
-			status = OpenThermStatus::RESPONSE_START_BIT;
-			responseTimestamp = newTs;
-		}
-		else {
-			status = OpenThermStatus::RESPONSE_INVALID;
-			responseTimestamp = newTs;
+		if ((newTs - responseTimestamp) > 20000) {
+			if (readState() == HIGH) {
+				status = OpenThermStatus::RESPONSE_START_BIT;
+				responseTimestamp = newTs;
+			}
+			else {
+				status = OpenThermStatus::RESPONSE_INVALID;
+				responseTimestamp = newTs;
+			}
 		}
 	}
 	else if (status == OpenThermStatus::RESPONSE_START_BIT) {
@@ -155,6 +159,7 @@ void IRAM_ATTR OpenTherm::handleInterrupt()
 			status = OpenThermStatus::RESPONSE_RECEIVING;
 			responseTimestamp = newTs;
 			responseBitIndex = 0;
+			response = 0;
 		}
 		else {
 			status = OpenThermStatus::RESPONSE_INVALID;
@@ -162,7 +167,8 @@ void IRAM_ATTR OpenTherm::handleInterrupt()
 		}
 	}
 	else if (status == OpenThermStatus::RESPONSE_RECEIVING) {
-		if ((newTs - responseTimestamp) > 750) {
+		unsigned long bitDuration = newTs - responseTimestamp;
+		if ((newTs - responseTimestamp) > 750 && bitDuration < 1300) { // bitDuration should not bigger than 1500
 			if (responseBitIndex < 32) {
 				response = (response << 1) | !readState();
 				responseTimestamp = newTs;
@@ -185,7 +191,7 @@ void OpenTherm::process()
 
 	if (st == OpenThermStatus::READY) return;
 	unsigned long newTs = micros();
-	if (st != OpenThermStatus::NOT_INITIALIZED && st != OpenThermStatus::DELAY && (newTs - ts) > 1000000) {
+	if (st != OpenThermStatus::NOT_INITIALIZED && st != OpenThermStatus::RESPONSE_READY && st != OpenThermStatus::DELAY && (newTs - ts) > 1000000) {
 		status = OpenThermStatus::READY;
 		responseStatus = OpenThermResponseStatus::TIMEOUT;
 		if (processResponseCallback != NULL) {
@@ -297,6 +303,22 @@ const char *OpenTherm::messageTypeToString(OpenThermMessageType message_type)
 		case WRITE_ACK:	   return "WRITE_ACK";
 		case DATA_INVALID:	return "DATA_INVALID";
 		case UNKNOWN_DATA_ID: return "UNKNOWN_DATA_ID";
+		default:			  return "UNKNOWN";
+	}
+}
+
+const char *OpenTherm::stautsToString(OpenThermStatus status)
+{
+	switch (status) {
+		case NOT_INITIALIZED:	   return "NOT_INITIALIZED";
+		case READY:	  return "READY";
+		case DELAY:	return "DELAY";
+		case REQUEST_SENDING:		return "REQUEST_SENDING";
+		case RESPONSE_WAITING:		return "RESPONSE_WAITING";
+		case RESPONSE_START_BIT:	   return "RESPONSE_START_BIT";
+		case RESPONSE_RECEIVING:	return "RESPONSE_RECEIVING";
+		case RESPONSE_READY: return "RESPONSE_READY";
+		case RESPONSE_INVALID: return "RESPONSE_INVALID";
 		default:			  return "UNKNOWN";
 	}
 }
