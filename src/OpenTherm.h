@@ -126,6 +126,7 @@ public:
 	unsigned long getLastResponse();
 	OpenThermResponseStatus getLastResponseStatus();
 	const char *statusToString(OpenThermResponseStatus status);
+	const char *OpenThermMessageIDToString(OpenThermMessageID id);
 	void handleInterrupt();
 	void process();
 	void end();
