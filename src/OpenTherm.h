@@ -16,7 +16,7 @@ P MGS-TYPE SPARE DATA-ID  DATA-VALUE
 #include <stdint.h>
 #include <Arduino.h>
 
-enum OpenThermResponseStatus {
+enum class OpenThermResponseStatus {
 	NONE,
 	SUCCESS,
 	INVALID,
@@ -24,7 +24,7 @@ enum OpenThermResponseStatus {
 };
 
 
-enum OpenThermMessageType {
+enum class OpenThermMessageType {
 	/*  Master to Slave */
 	READ_DATA       = B000,
 	READ            = READ_DATA, // for backwared compatibility
@@ -41,7 +41,7 @@ enum OpenThermMessageType {
 
 typedef OpenThermMessageType OpenThermRequestType; // for backwared compatibility
 
-enum OpenThermMessageID {
+enum class OpenThermMessageID {
 	Status, // flag8 / flag8  Master and Slave Status flags.
 	TSet, // f8.8  Control setpoint  ie CH  water temperature setpoint (°C)
 	MConfigMMemberIDcode, // flag8 / u8  Master Configuration Flags /  Master MemberID Code
@@ -98,7 +98,7 @@ enum OpenThermMessageID {
 	SlaveVersion, // u8 / u8  Slave product version number and type
 };
 
-enum OpenThermStatus {
+enum class OpenThermStatus {
 	NOT_INITIALIZED,
 	READY,
 	DELAY,
