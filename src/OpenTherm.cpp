@@ -162,7 +162,8 @@ void IRAM_ATTR OpenTherm::handleInterrupt()
 		}
 	}
 	else if (status == OpenThermStatus::RESPONSE_RECEIVING) {
-		if ((newTs - responseTimestamp) > 750) {
+		uint32 bitDuration = newTs - responseTimestamp;
+		if ((newTs - responseTimestamp) > 750 && bitDuration < 1300) { // bitDuration should not bigger than 1500
 			if (responseBitIndex < 32) {
 				response = (response << 1) | !readState();
 				responseTimestamp = newTs;
