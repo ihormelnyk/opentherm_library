@@ -160,6 +160,8 @@ public:
     float getReturnTemperature();
     bool setDHWSetpoint(float temperature);
     float getDHWTemperature();
+    float getOutsideTemperature();
+    float getDHWFlowrate();
     float getModulation();
     float getPressure();
     unsigned char getFault();

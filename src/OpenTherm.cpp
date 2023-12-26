@@ -378,8 +378,13 @@ float OpenTherm::getBoilerTemperature() {
 }
 
 float OpenTherm::getReturnTemperature() {
-    unsigned long response = sendRequest(buildRequest(OpenThermRequestType::READ, OpenThermMessageID::Tret, 0));
-    return isValidResponse(response) ? getFloat(response) : 0;
+	unsigned long response = sendRequest(buildRequest(OpenThermRequestType::READ, OpenThermMessageID::Tret, 0));
+	return isValidResponse(response) ? getFloat(response) : 0;
+}
+
+float OpenTherm::getOutsideTemperature() {
+	unsigned long response = sendRequest(buildRequest(OpenThermRequestType::READ, OpenThermMessageID::Toutside, 0));
+	return isValidResponse(response) ? getFloat(response) : 0;
 }
 
 bool OpenTherm::setDHWSetpoint(float temperature) {
@@ -392,6 +397,12 @@ float OpenTherm::getDHWTemperature() {
     unsigned long response = sendRequest(buildRequest(OpenThermMessageType::READ_DATA, OpenThermMessageID::Tdhw, 0));
     return isValidResponse(response) ? getFloat(response) : 0;
 }
+
+float OpenTherm::getDHWFlowrate() {
+	unsigned long response = sendRequest(buildRequest(OpenThermMessageType::READ_DATA, OpenThermMessageID::DHWFlowRate, 0));
+	return isValidResponse(response) ? getFloat(response) : 0;
+}
+
 
 float OpenTherm::getModulation() {
     unsigned long response = sendRequest(buildRequest(OpenThermRequestType::READ, OpenThermMessageID::RelModLevel, 0));
