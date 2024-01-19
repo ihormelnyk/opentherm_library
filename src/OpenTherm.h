@@ -117,6 +117,9 @@ public:
 	volatile OpenThermStatus status;
 	void begin(void(*handleInterruptCallback)(void));
 	void begin(void(*handleInterruptCallback)(void), void(*processResponseCallback)(unsigned long, OpenThermResponseStatus));
+	void setMaxTransmissionWindowTime(unsigned int);
+	void setMinWaitTimeForStartBit(unsigned int);
+	void setMaxWaitTimeForStartBit(unsigned int);
 	bool isReady();
 	unsigned long sendRequest(unsigned long request);
 	bool sendResponse(unsigned long request);
@@ -168,10 +171,14 @@ private:
 	const int inPin;
 	const int outPin;
 	const bool isSlave;
+	unsigned int maxTransmissionWindowTime = 1150000; // 1000ms +15%
+	unsigned int minWaitTimeForStartBit = 0;
+	unsigned int maxWaitTimeForStartBit = 920000; // 850ms +15%
 
 	volatile unsigned long response;
 	volatile OpenThermResponseStatus responseStatus;
 	volatile unsigned long responseTimestamp;
+	volatile unsigned long requestTimestamp;
 	volatile byte responseBitIndex;
 
 	int readState();

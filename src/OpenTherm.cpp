@@ -36,6 +36,21 @@ void OpenTherm::begin(void(*handleInterruptCallback)(void))
 	begin(handleInterruptCallback, NULL);
 }
 
+void OpenTherm::setMaxTransmissionWindowTime(unsigned int time)
+{
+	maxTransmissionWindowTime = time;
+}
+
+void OpenTherm::setMinWaitTimeForStartBit(unsigned int time)
+{
+	minWaitTimeForStartBit = time;
+}
+
+void OpenTherm::setMaxWaitTimeForStartBit(unsigned int time)
+{
+	maxWaitTimeForStartBit = time;
+}
+
 bool IRAM_ATTR OpenTherm::isReady()
 {
 	return status == OpenThermStatus::READY;
@@ -79,6 +94,7 @@ bool OpenTherm::sendRequestAync(unsigned long request)
 	status = OpenThermStatus::REQUEST_SENDING;
 	response = 0;
 	responseStatus = OpenThermResponseStatus::NONE;
+	requestTimestamp = micros();
 
 	sendBit(HIGH); //start bit
 	for (int i = 31; i >= 0; i--) {
@@ -142,8 +158,9 @@ void IRAM_ATTR OpenTherm::handleInterrupt()
 	}
 
 	unsigned long newTs = micros();
+	unsigned long estimatedTs = newTs - responseTimestamp;
 	if (status == OpenThermStatus::RESPONSE_WAITING) {
-		if ((newTs - responseTimestamp) > 20000) {
+		if (isSlave || (estimatedTs >= minWaitTimeForStartBit && estimatedTs <= maxWaitTimeForStartBit)) {
 			if (readState() == HIGH) {
 				status = OpenThermStatus::RESPONSE_START_BIT;
 				responseTimestamp = newTs;
@@ -155,7 +172,7 @@ void IRAM_ATTR OpenTherm::handleInterrupt()
 		}
 	}
 	else if (status == OpenThermStatus::RESPONSE_START_BIT) {
-		if ((newTs - responseTimestamp < 750) && readState() == LOW) {
+		if (estimatedTs < 750 && readState() == LOW) {
 			status = OpenThermStatus::RESPONSE_RECEIVING;
 			responseTimestamp = newTs;
 			responseBitIndex = 0;
@@ -167,7 +184,7 @@ void IRAM_ATTR OpenTherm::handleInterrupt()
 		}
 	}
 	else if (status == OpenThermStatus::RESPONSE_RECEIVING) {
-		if ((newTs - responseTimestamp) > 750) {
+		if (estimatedTs > 750) {
 			if (responseBitIndex < 32) {
 				response = (response << 1) | !readState();
 				responseTimestamp = newTs;
@@ -190,7 +207,9 @@ void OpenTherm::process()
 
 	if (st == OpenThermStatus::READY) return;
 	unsigned long newTs = micros();
-	if (st != OpenThermStatus::NOT_INITIALIZED && st != OpenThermStatus::RESPONSE_READY && st != OpenThermStatus::DELAY && (newTs - ts) > 1000000) {
+	unsigned long estimatedTs = newTs - (isSlave ? ts : requestTimestamp);
+
+	if (st != OpenThermStatus::NOT_INITIALIZED && st != OpenThermStatus::RESPONSE_READY && st != OpenThermStatus::DELAY && estimatedTs > maxTransmissionWindowTime) {
 		status = OpenThermStatus::READY;
 		responseStatus = OpenThermResponseStatus::TIMEOUT;
 		if (processResponseCallback != NULL) {
@@ -212,7 +231,7 @@ void OpenTherm::process()
 		}
 	}
 	else if (st == OpenThermStatus::DELAY) {
-		if ((newTs - ts) > 100000) {
+		if ((newTs - ts) > 115000) {
 			status = OpenThermStatus::READY;
 		}
 	}
