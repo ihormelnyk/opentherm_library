@@ -173,7 +173,7 @@ private:
 	const bool isSlave;
 	unsigned int maxTransmissionWindowTime = 1150000; // 1000ms +15%
 	unsigned int minWaitTimeForStartBit = 0;
-	unsigned int maxWaitTimeForStartBit = 920000; // 850ms +15%
+	unsigned int maxWaitTimeForStartBit = 920000; // 800ms +15%
 
 	volatile unsigned long response;
 	volatile OpenThermResponseStatus responseStatus;
