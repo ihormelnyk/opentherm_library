@@ -16,7 +16,7 @@ P MGS-TYPE SPARE DATA-ID  DATA-VALUE
 #include <stdint.h>
 #include <Arduino.h>
 
-enum class OpenThermResponseStatus : byte {
+enum class OpenThermResponseStatus {
 	NONE,
 	SUCCESS,
 	INVALID,
@@ -24,7 +24,7 @@ enum class OpenThermResponseStatus : byte {
 };
 
 
-enum class OpenThermMessageType : byte {
+enum class OpenThermMessageType {
 	/*  Master to Slave */
 	READ_DATA       = B000,
 	READ            = READ_DATA, // for backwared compatibility
@@ -41,7 +41,7 @@ enum class OpenThermMessageType : byte {
 
 typedef OpenThermMessageType OpenThermRequestType; // for backwared compatibility
 
-enum class OpenThermMessageID : byte {
+enum class OpenThermMessageID {
 	Status, // flag8 / flag8  Master and Slave Status flags.
 	TSet, // f8.8  Control setpoint  ie CH  water temperature setpoint (°C)
 	MConfigMMemberIDcode, // flag8 / u8  Master Configuration Flags /  Master MemberID Code
@@ -98,7 +98,7 @@ enum class OpenThermMessageID : byte {
 	SlaveVersion, // u8 / u8  Slave product version number and type
 };
 
-enum class OpenThermStatus : byte {
+enum class OpenThermStatus {
 	NOT_INITIALIZED,
 	READY,
 	DELAY,
@@ -157,12 +157,12 @@ public:
 	unsigned long setBoilerStatus(bool enableCentralHeating, bool enableHotWater = false, bool enableCooling = false, bool enableOutsideTemperatureCompensation = false, bool enableCentralHeating2 = false);
 	bool setBoilerTemperature(float temperature);
 	float getBoilerTemperature();
-    float getReturnTemperature();
-    bool setDHWSetpoint(float temperature);
-    float getDHWTemperature();
-    float getModulation();
-    float getPressure();
-    unsigned char getFault();
+	float getReturnTemperature();
+	bool setDHWSetpoint(float temperature);
+	float getDHWTemperature();
+	float getModulation();
+	float getPressure();
+	unsigned char getFault();
 
 private:
 	const int inPin;

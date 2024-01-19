@@ -134,7 +134,7 @@ void IRAM_ATTR OpenTherm::handleInterrupt()
 	if (isReady())
 	{
 		if (isSlave && readState() == HIGH) {
-		   status = OpenThermStatus::RESPONSE_WAITING;
+			status = OpenThermStatus::RESPONSE_WAITING;
 		}
 		else {
 			return;
@@ -283,26 +283,26 @@ void OpenTherm::end() {
 const char *OpenTherm::statusToString(OpenThermResponseStatus status)
 {
 	switch (status) {
-		case OpenThermResponseStatus::NONE:	   return "NONE";
-		case OpenThermResponseStatus::SUCCESS: return "SUCCESS";
-		case OpenThermResponseStatus::INVALID: return "INVALID";
-		case OpenThermResponseStatus::TIMEOUT: return "TIMEOUT";
-		default:	                           return "UNKNOWN";
+		case OpenThermResponseStatus::NONE:         return "NONE";
+		case OpenThermResponseStatus::SUCCESS:      return "SUCCESS";
+		case OpenThermResponseStatus::INVALID:      return "INVALID";
+		case OpenThermResponseStatus::TIMEOUT:      return "TIMEOUT";
+		default:                                    return "UNKNOWN";
 	}
 }
 
 const char *OpenTherm::messageTypeToString(OpenThermMessageType message_type)
 {
 	switch (message_type) {
-		case OpenThermMessageType::READ_DATA:	    return "READ_DATA";
-		case OpenThermMessageType::WRITE_DATA:	    return "WRITE_DATA";
-		case OpenThermMessageType::INVALID_DATA:	return "INVALID_DATA";
-		case OpenThermMessageType::RESERVED:		return "RESERVED";
-		case OpenThermMessageType::READ_ACK:		return "READ_ACK";
-		case OpenThermMessageType::WRITE_ACK:	    return "WRITE_ACK";
-		case OpenThermMessageType::DATA_INVALID:	return "DATA_INVALID";
+		case OpenThermMessageType::READ_DATA:       return "READ_DATA";
+		case OpenThermMessageType::WRITE_DATA:      return "WRITE_DATA";
+		case OpenThermMessageType::INVALID_DATA:    return "INVALID_DATA";
+		case OpenThermMessageType::RESERVED:        return "RESERVED";
+		case OpenThermMessageType::READ_ACK:        return "READ_ACK";
+		case OpenThermMessageType::WRITE_ACK:       return "WRITE_ACK";
+		case OpenThermMessageType::DATA_INVALID:    return "DATA_INVALID";
 		case OpenThermMessageType::UNKNOWN_DATA_ID: return "UNKNOWN_DATA_ID";
-		default:			                        return "UNKNOWN";
+		default:                                    return "UNKNOWN";
 	}
 }
 
@@ -383,31 +383,31 @@ float OpenTherm::getBoilerTemperature() {
 }
 
 float OpenTherm::getReturnTemperature() {
-    unsigned long response = sendRequest(buildRequest(OpenThermRequestType::READ, OpenThermMessageID::Tret, 0));
-    return isValidResponse(response) ? getFloat(response) : 0;
+	unsigned long response = sendRequest(buildRequest(OpenThermRequestType::READ, OpenThermMessageID::Tret, 0));
+	return isValidResponse(response) ? getFloat(response) : 0;
 }
 
 bool OpenTherm::setDHWSetpoint(float temperature) {
-    unsigned int data = temperatureToData(temperature);
-    unsigned long response = sendRequest(buildRequest(OpenThermMessageType::WRITE_DATA, OpenThermMessageID::TdhwSet, data));
-    return isValidResponse(response);
+	unsigned int data = temperatureToData(temperature);
+	unsigned long response = sendRequest(buildRequest(OpenThermMessageType::WRITE_DATA, OpenThermMessageID::TdhwSet, data));
+	return isValidResponse(response);
 }
-    
+	
 float OpenTherm::getDHWTemperature() {
-    unsigned long response = sendRequest(buildRequest(OpenThermMessageType::READ_DATA, OpenThermMessageID::Tdhw, 0));
-    return isValidResponse(response) ? getFloat(response) : 0;
+	unsigned long response = sendRequest(buildRequest(OpenThermMessageType::READ_DATA, OpenThermMessageID::Tdhw, 0));
+	return isValidResponse(response) ? getFloat(response) : 0;
 }
 
 float OpenTherm::getModulation() {
-    unsigned long response = sendRequest(buildRequest(OpenThermRequestType::READ, OpenThermMessageID::RelModLevel, 0));
-    return isValidResponse(response) ? getFloat(response) : 0;
+	unsigned long response = sendRequest(buildRequest(OpenThermRequestType::READ, OpenThermMessageID::RelModLevel, 0));
+	return isValidResponse(response) ? getFloat(response) : 0;
 }
 
 float OpenTherm::getPressure() {
-    unsigned long response = sendRequest(buildRequest(OpenThermRequestType::READ, OpenThermMessageID::CHPressure, 0));
-    return isValidResponse(response) ? getFloat(response) : 0;
+	unsigned long response = sendRequest(buildRequest(OpenThermRequestType::READ, OpenThermMessageID::CHPressure, 0));
+	return isValidResponse(response) ? getFloat(response) : 0;
 }
 
 unsigned char OpenTherm::getFault() {
-    return ((sendRequest(buildRequest(OpenThermRequestType::READ, OpenThermMessageID::ASFflags, 0)) >> 8) & 0xff);
+	return ((sendRequest(buildRequest(OpenThermRequestType::READ, OpenThermMessageID::ASFflags, 0)) >> 8) & 0xff);
 }
