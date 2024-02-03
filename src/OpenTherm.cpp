@@ -1,9 +1,12 @@
 /*
-OpenTherm.cpp - OpenTherm Communication Library For Arduino, ESP8266
-Copyright 2018, Ihor Melnyk
+OpenTherm.cpp - OpenTherm Communication Library For Arduino, ESP8266, ESP32
+Copyright 2023, Ihor Melnyk
 */
 
 #include "OpenTherm.h"
+#if !defined(__AVR__)
+#include "FunctionalInterrupt.h"
+#endif
 
 OpenTherm::OpenTherm(int inPin, int outPin, bool isSlave):
 	status(OpenThermStatus::NOT_INITIALIZED),
@@ -13,28 +16,46 @@ OpenTherm::OpenTherm(int inPin, int outPin, bool isSlave):
 	response(0),
 	responseStatus(OpenThermResponseStatus::NONE),
 	responseTimestamp(0),
-	handleInterruptCallback(NULL),
 	processResponseCallback(NULL)
 {
 }
 
-void OpenTherm::begin(void(*handleInterruptCallback)(void), void(*processResponseCallback)(unsigned long, OpenThermResponseStatus))
+void OpenTherm::begin(void(*handleInterruptCallback)(void))
 {
 	pinMode(inPin, INPUT);
 	pinMode(outPin, OUTPUT);
 	if (handleInterruptCallback != NULL) {
-		this->handleInterruptCallback = handleInterruptCallback;
-		attachInterrupt(digitalPinToInterrupt(inPin), handleInterruptCallback, CHANGE);
+		attachInterrupt(digitalPinToInterrupt(inPin), handleInterruptCallback, CHANGE);	
+	}
+	else
+	{
+#if !defined(__AVR__)
+		attachInterrupt(digitalPinToInterrupt(inPin), [this]() {
+			this->handleInterrupt();
+		}, CHANGE);
+#endif
 	}
 	activateBoiler();
 	status = OpenThermStatus::READY;
+}
+
+void OpenTherm::begin(void(*handleInterruptCallback)(void), void(*processResponseCallback)(unsigned long, OpenThermResponseStatus))
+{
+	begin(handleInterruptCallback);
 	this->processResponseCallback = processResponseCallback;
 }
 
-void OpenTherm::begin(void(*handleInterruptCallback)(void))
+#if !defined(__AVR__)
+void OpenTherm::begin()
 {
-	begin(handleInterruptCallback, NULL);
+	begin(NULL);
 }
+
+void OpenTherm::begin(std::function<void(unsigned long, OpenThermResponseStatus)> processResponseFunction) {
+	begin();
+	this->processResponseFunction = processResponseFunction;
+}
+#endif
 
 bool IRAM_ATTR OpenTherm::isReady()
 {
@@ -176,6 +197,18 @@ void IRAM_ATTR OpenTherm::handleInterrupt()
 	}
 }
 
+void OpenTherm::processResponse()
+{
+	if (processResponseCallback != NULL) {
+		processResponseCallback(response, responseStatus);
+	}
+#if !defined(__AVR__)
+	if (this->processResponseFunction != NULL) {
+		processResponseFunction(response, responseStatus);
+	}
+#endif
+}
+
 void OpenTherm::process()
 {
 	noInterrupts();
@@ -188,23 +221,17 @@ void OpenTherm::process()
 	if (st != OpenThermStatus::NOT_INITIALIZED && st != OpenThermStatus::DELAY && (newTs - ts) > 1000000) {
 		status = OpenThermStatus::READY;
 		responseStatus = OpenThermResponseStatus::TIMEOUT;
-		if (processResponseCallback != NULL) {
-			processResponseCallback(response, responseStatus);
-		}
+		processResponse();
 	}
 	else if (st == OpenThermStatus::RESPONSE_INVALID) {
 		status = OpenThermStatus::DELAY;
 		responseStatus = OpenThermResponseStatus::INVALID;
-		if (processResponseCallback != NULL) {
-			processResponseCallback(response, responseStatus);
-		}
+		processResponse();
 	}
 	else if (st == OpenThermStatus::RESPONSE_READY) {
 		status = OpenThermStatus::DELAY;
 		responseStatus = (isSlave ? isValidRequest(response) : isValidResponse(response)) ? OpenThermResponseStatus::SUCCESS : OpenThermResponseStatus::INVALID;
-		if (processResponseCallback != NULL) {
-			processResponseCallback(response, responseStatus);
-		}
+		processResponse();
 	}
 	else if (st == OpenThermStatus::DELAY) {
 		if ((newTs - ts) > 100000) {
@@ -270,9 +297,11 @@ bool OpenTherm::isValidRequest(unsigned long request)
 }
 
 void OpenTherm::end() {
-	if (this->handleInterruptCallback != NULL) {
-		detachInterrupt(digitalPinToInterrupt(inPin));
-	}
+	detachInterrupt(digitalPinToInterrupt(inPin));
+}
+
+OpenTherm::~OpenTherm() {
+	end();
 }
 
 const char *OpenTherm::statusToString(OpenThermResponseStatus status)
@@ -343,12 +372,12 @@ bool OpenTherm::isDiagnostic(unsigned long response) {
 	return response & 0x40;
 }
 
-uint16_t OpenTherm::getUInt(const unsigned long response) const {
+uint16_t OpenTherm::getUInt(const unsigned long response) {
 	const uint16_t u88 = response & 0xffff;
 	return u88;
 }
 
-float OpenTherm::getFloat(const unsigned long response) const {
+float OpenTherm::getFloat(const unsigned long response) {
 	const uint16_t u88 = getUInt(response);
 	const float f = (u88 & 0x8000) ? -(0x10000L - u88) / 256.0f : u88 / 256.0f;
 	return f;

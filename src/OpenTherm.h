@@ -1,9 +1,9 @@
 /*
-OpenTherm.h - OpenTherm Library for the ESP8266/Arduino platform
+OpenTherm.h - OpenTherm Library for the ESP8266/ESP32/Arduino platform
 https://github.com/ihormelnyk/OpenTherm
 http://ihormelnyk.com/pages/OpenTherm
 Licensed under MIT license
-Copyright 2018, Ihor Melnyk
+Copyright 2023, Ihor Melnyk
 
 Frame Structure:
 P MGS-TYPE SPARE DATA-ID  DATA-VALUE
@@ -114,44 +114,49 @@ class OpenTherm
 {
 public:
 	OpenTherm(int inPin = 4, int outPin = 5, bool isSlave = false);
+	~OpenTherm();
 	volatile OpenThermStatus status;
 	void begin(void(*handleInterruptCallback)(void));
 	void begin(void(*handleInterruptCallback)(void), void(*processResponseCallback)(unsigned long, OpenThermResponseStatus));
+#if !defined(__AVR__)
+	void begin();
+	void begin(std::function<void(unsigned long, OpenThermResponseStatus)> processResponseFunction);
+#endif	
 	bool isReady();
 	unsigned long sendRequest(unsigned long request);
 	bool sendResponse(unsigned long request);
 	bool sendRequestAync(unsigned long request);
-	unsigned long buildRequest(OpenThermMessageType type, OpenThermMessageID id, unsigned int data);
-	unsigned long buildResponse(OpenThermMessageType type, OpenThermMessageID id, unsigned int data);
+	static unsigned long buildRequest(OpenThermMessageType type, OpenThermMessageID id, unsigned int data);
+	static unsigned long buildResponse(OpenThermMessageType type, OpenThermMessageID id, unsigned int data);
 	unsigned long getLastResponse();
 	OpenThermResponseStatus getLastResponseStatus();
-	const char *statusToString(OpenThermResponseStatus status);
+	static const char *statusToString(OpenThermResponseStatus status);
 	void handleInterrupt();
 	void process();
 	void end();
 
-	bool parity(unsigned long frame);
-	OpenThermMessageType getMessageType(unsigned long message);
-	OpenThermMessageID getDataID(unsigned long frame);
-	const char *messageTypeToString(OpenThermMessageType message_type);
-	bool isValidRequest(unsigned long request);
-	bool isValidResponse(unsigned long response);
+	static bool parity(unsigned long frame);
+	static OpenThermMessageType getMessageType(unsigned long message);
+	static OpenThermMessageID getDataID(unsigned long frame);
+	static const char *messageTypeToString(OpenThermMessageType message_type);
+	static bool isValidRequest(unsigned long request);
+	static bool isValidResponse(unsigned long response);
 
 	//requests
-	unsigned long buildSetBoilerStatusRequest(bool enableCentralHeating, bool enableHotWater = false, bool enableCooling = false, bool enableOutsideTemperatureCompensation = false, bool enableCentralHeating2 = false);
-	unsigned long buildSetBoilerTemperatureRequest(float temperature);
-	unsigned long buildGetBoilerTemperatureRequest();
+	static unsigned long buildSetBoilerStatusRequest(bool enableCentralHeating, bool enableHotWater = false, bool enableCooling = false, bool enableOutsideTemperatureCompensation = false, bool enableCentralHeating2 = false);
+	static unsigned long buildSetBoilerTemperatureRequest(float temperature);
+	static unsigned long buildGetBoilerTemperatureRequest();
 
 	//responses
-	bool isFault(unsigned long response);
-	bool isCentralHeatingActive(unsigned long response);
-	bool isHotWaterActive(unsigned long response);
-	bool isFlameOn(unsigned long response);
-	bool isCoolingActive(unsigned long response);
-	bool isDiagnostic(unsigned long response);
-	uint16_t getUInt(const unsigned long response) const;
-	float getFloat(const unsigned long response) const;	
-	unsigned int temperatureToData(float temperature);
+	static bool isFault(unsigned long response);
+	static bool isCentralHeatingActive(unsigned long response);
+	static bool isHotWaterActive(unsigned long response);
+	static bool isFlameOn(unsigned long response);
+	static bool isCoolingActive(unsigned long response);
+	static bool isDiagnostic(unsigned long response);
+	static uint16_t getUInt(const unsigned long response);
+	static float getFloat(const unsigned long response);	
+	static unsigned int temperatureToData(float temperature);
 
 	//basic requests
 	unsigned long setBoilerStatus(bool enableCentralHeating, bool enableHotWater = false, bool enableCooling = false, bool enableOutsideTemperatureCompensation = false, bool enableCentralHeating2 = false);
@@ -180,8 +185,11 @@ private:
 	void activateBoiler();
 
 	void sendBit(bool high);
-	void(*handleInterruptCallback)();
-	void(*processResponseCallback)(unsigned long, OpenThermResponseStatus);
+	void processResponse();
+	void(*processResponseCallback)(unsigned long, OpenThermResponseStatus);	
+#if !defined(__AVR__)
+	std::function<void(unsigned long, OpenThermResponseStatus)> processResponseFunction;
+#endif
 };
 
 #ifndef ICACHE_RAM_ATTR

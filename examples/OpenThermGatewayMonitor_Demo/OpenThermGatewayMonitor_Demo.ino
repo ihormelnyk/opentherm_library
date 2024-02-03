@@ -38,7 +38,7 @@ void processRequest(unsigned long request, OpenThermResponseStatus status) {
 void setup()
 {
     Serial.begin(9600);	//9600 supported by OpenTherm Monitor App
-    mOT.begin(mHandleInterrupt);
+    mOT.begin(mHandleInterrupt);  //for ESP ot.begin(); without interrupt handler can be used
     sOT.begin(sHandleInterrupt, processRequest);
 }
 

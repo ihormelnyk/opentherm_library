@@ -72,7 +72,7 @@ void setup()
     Serial.begin(9600);
     Serial.println("Start");
 
-    ot.begin(handleInterrupt, processRequest);
+    ot.begin(handleInterrupt, processRequest);  //for ESP ot.begin(); without interrupt handler can be used
 }
 
 
