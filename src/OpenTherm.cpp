@@ -234,7 +234,7 @@ void OpenTherm::process()
 		processResponse();
 	}
 	else if (st == OpenThermStatus::DELAY) {
-		if ((newTs - ts) > 100000) {
+		if ((newTs - ts) > (isSlave ? 20000 : 100000)) {
 			status = OpenThermStatus::READY;
 		}
 	}
