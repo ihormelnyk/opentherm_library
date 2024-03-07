@@ -175,7 +175,11 @@ public:
     bool isReady();
     unsigned long sendRequest(unsigned long request);
     bool sendResponse(unsigned long request);
-    bool sendRequestAync(unsigned long request);
+    bool sendRequestAsync(unsigned long request);
+    [[deprecated("Use OpenTherm::sendRequestAsync(unsigned long) instead")]]
+    bool sendRequestAync(unsigned long request) {
+        return sendRequestAsync(request);
+    }
     static unsigned long buildRequest(OpenThermMessageType type, OpenThermMessageID id, unsigned int data);
     static unsigned long buildResponse(OpenThermMessageType type, OpenThermMessageID id, unsigned int data);
     unsigned long getLastResponse();
