@@ -175,6 +175,7 @@ public:
     bool isReady();
     unsigned long sendRequest(unsigned long request);
     bool sendResponse(unsigned long request);
+    bool sendRequestAsync(unsigned long request);
     bool sendRequestAync(unsigned long request);
     static unsigned long buildRequest(OpenThermMessageType type, OpenThermMessageID id, unsigned int data);
     static unsigned long buildResponse(OpenThermMessageType type, OpenThermMessageID id, unsigned int data);

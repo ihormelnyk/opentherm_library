@@ -100,7 +100,7 @@ void OpenTherm::sendBit(bool high)
     delayMicroseconds(500);
 }
 
-bool OpenTherm::sendRequestAync(unsigned long request)
+bool OpenTherm::sendRequestAsync(unsigned long request)
 {
     noInterrupts();
     const bool ready = isReady();
@@ -145,10 +145,19 @@ bool OpenTherm::sendRequestAync(unsigned long request)
     return true;
 }
 
+[[deprecated("Use OpenTherm::sendRequestAsync(unsigned long) instead")]]
+bool OpenTherm::sendRequestAync(unsigned long request)
+{
+    return sendRequestAsync(request);
+}
+
 unsigned long OpenTherm::sendRequest(unsigned long request)
 {
-    if (!sendRequestAync(request))
+    if (!sendRequestAsync(request))
+    {
         return 0;
+    }
+
     while (!isReady())
     {
         process();
