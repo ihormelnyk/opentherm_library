@@ -102,17 +102,28 @@ void OpenTherm::sendBit(bool high)
 
 bool OpenTherm::sendRequestAync(unsigned long request)
 {
-    // Serial.println("Request: " + String(request, HEX));
     noInterrupts();
     const bool ready = isReady();
-    interrupts();
 
     if (!ready)
+    {
+        interrupts();
         return false;
+    }
 
     status = OpenThermStatus::REQUEST_SENDING;
     response = 0;
     responseStatus = OpenThermResponseStatus::NONE;
+
+#ifdef INC_FREERTOS_H
+    BaseType_t schedulerState = xTaskGetSchedulerState();
+    if (schedulerState == taskSCHEDULER_RUNNING)
+    {
+        vTaskSuspendAll();
+    }
+#endif
+
+    interrupts();
 
     sendBit(HIGH); // start bit
     for (int i = 31; i >= 0; i--)
@@ -122,8 +133,15 @@ bool OpenTherm::sendRequestAync(unsigned long request)
     sendBit(HIGH); // stop bit
     setIdleState();
 
-    status = OpenThermStatus::RESPONSE_WAITING;
     responseTimestamp = micros();
+    status = OpenThermStatus::RESPONSE_WAITING;
+
+#ifdef INC_FREERTOS_H
+    if (schedulerState == taskSCHEDULER_RUNNING) {
+        xTaskResumeAll();
+    }
+#endif
+
     return true;
 }
 
