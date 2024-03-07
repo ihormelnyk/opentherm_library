@@ -145,12 +145,6 @@ bool OpenTherm::sendRequestAsync(unsigned long request)
     return true;
 }
 
-[[deprecated("Use OpenTherm::sendRequestAsync(unsigned long) instead")]]
-bool OpenTherm::sendRequestAync(unsigned long request)
-{
-    return sendRequestAsync(request);
-}
-
 unsigned long OpenTherm::sendRequest(unsigned long request)
 {
     if (!sendRequestAsync(request))
