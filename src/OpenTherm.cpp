@@ -168,9 +168,28 @@ unsigned long OpenTherm::sendRequest(unsigned long request)
 
 bool OpenTherm::sendResponse(unsigned long request)
 {
+    noInterrupts();
+    const bool ready = isReady();
+
+    if (!ready)
+    {
+        interrupts();
+        return false;
+    }
+
     status = OpenThermStatus::REQUEST_SENDING;
     response = 0;
     responseStatus = OpenThermResponseStatus::NONE;
+
+#ifdef INC_FREERTOS_H
+    BaseType_t schedulerState = xTaskGetSchedulerState();
+    if (schedulerState == taskSCHEDULER_RUNNING)
+    {
+        vTaskSuspendAll();
+    }
+#endif
+
+    interrupts();
 
     sendBit(HIGH); // start bit
     for (int i = 31; i >= 0; i--)
@@ -180,6 +199,13 @@ bool OpenTherm::sendResponse(unsigned long request)
     sendBit(HIGH); // stop bit
     setIdleState();
     status = OpenThermStatus::READY;
+
+#ifdef INC_FREERTOS_H
+    if (schedulerState == taskSCHEDULER_RUNNING) {
+        xTaskResumeAll();
+    }
+#endif
+
     return true;
 }
 
