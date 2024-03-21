@@ -277,7 +277,8 @@ void IRAM_ATTR OpenTherm::handleInterrupt()
 }
 
 #if !defined(__AVR__)
-void IRAM_ATTR OpenTherm::handleInterruptHelper(void* ptr) {
+void IRAM_ATTR OpenTherm::handleInterruptHelper(void* ptr)
+{
     static_cast<OpenTherm*>(ptr)->handleInterrupt();
 }
 #endif
