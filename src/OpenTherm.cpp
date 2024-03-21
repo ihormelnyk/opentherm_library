@@ -31,10 +31,12 @@ void OpenTherm::begin(void (*handleInterruptCallback)(void))
     else
     {
 #if !defined(__AVR__)
-        attachInterrupt(
-            digitalPinToInterrupt(inPin), [this]()
-            { this->handleInterrupt(); },
-            CHANGE);
+        attachInterruptArg(
+            digitalPinToInterrupt(inPin),
+            OpenTherm::handleInterruptHelper,
+            this,
+            CHANGE
+        );
 #endif
     }
     activateBoiler();
@@ -273,6 +275,12 @@ void IRAM_ATTR OpenTherm::handleInterrupt()
         }
     }
 }
+
+#if !defined(__AVR__)
+void IRAM_ATTR OpenTherm::handleInterruptHelper(void* ptr) {
+    static_cast<OpenTherm*>(ptr)->handleInterrupt();
+}
+#endif
 
 void OpenTherm::processResponse()
 {
