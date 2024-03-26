@@ -186,6 +186,9 @@ public:
     OpenThermResponseStatus getLastResponseStatus();
     static const char *statusToString(OpenThermResponseStatus status);
     void handleInterrupt();
+#if !defined(__AVR__)
+    static void handleInterruptHelper(void* ptr);
+#endif
     void process();
     void end();
 
