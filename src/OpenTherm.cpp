@@ -265,7 +265,7 @@ void IRAM_ATTR OpenTherm::handleInterrupt()
             {
                 response = (response << 1) | !readState();
                 responseTimestamp = newTs;
-                responseBitIndex++;
+                responseBitIndex = responseBitIndex + 1;
             }
             else
             { // stop bit
