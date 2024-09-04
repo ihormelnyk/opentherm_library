@@ -423,7 +423,8 @@ const char *OpenTherm::statusToString(OpenThermResponseStatus status)
     }
 }
 
-const char *OpenTherm::messageIDToString(OpenThermMessageID message_id) {
+const char *OpenTherm::messageIDToString(OpenThermMessageID message_id) 
+{
     switch(message_id)
     {
         case OpenThermMessageID::Status:
