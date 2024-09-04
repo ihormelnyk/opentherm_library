@@ -423,6 +423,122 @@ const char *OpenTherm::statusToString(OpenThermResponseStatus status)
     }
 }
 
+const char *OpenTherm::messageIDToString(OpenThermMessageID message_id) {
+    switch(message_id)
+    {
+        case OpenThermMessageID::Status:
+            return "Status";
+        case OpenThermMessageID::TSet:
+            return "TSet";
+        case OpenThermMessageID::MConfigMMemberIDcode:
+            return "MConfigMMemberIDcode";
+        case OpenThermMessageID::SConfigSMemberIDcode:
+            return "SConfigSMemberIDcode";
+        case OpenThermMessageID::Command:
+            return "Command";
+        case OpenThermMessageID::ASFflags:
+            return "ASFflags";
+        case OpenThermMessageID::RBPflags:
+            return "RBPflags";
+        case OpenThermMessageID::CoolingControl:
+            return "CoolingControl";
+        case OpenThermMessageID::TsetCH2:
+            return "TsetCH2";
+        case OpenThermMessageID::TrOverride:
+            return "TrOverride";
+        case OpenThermMessageID::TSP:
+            return "TSP";
+        case OpenThermMessageID::TSPindexTSPvalue:
+            return "TSPindexTSPvalue";
+        case OpenThermMessageID::FHBsize:
+            return "FHBsize";
+        case OpenThermMessageID::FHBindexFHBvalue:
+            return "FHBindexFHBvalue";
+        case OpenThermMessageID::MaxRelModLevelSetting:
+            return "MaxRelModLevelSetting";
+        case OpenThermMessageID::MaxCapacityMinModLevel:
+            return "MaxCapacityMinModLevel";
+        case OpenThermMessageID::TrSet:
+            return "TrSet";
+        case OpenThermMessageID::RelModLevel:
+            return "RelModLevel";
+        case OpenThermMessageID::CHPressure:
+            return "CHPressure";
+        case OpenThermMessageID::DHWFlowRate:
+            return "DHWFlowRate";
+        case OpenThermMessageID::DayTime:
+            return "DayTime";
+        case OpenThermMessageID::Date:
+            return "Date";
+        case OpenThermMessageID::Year:
+            return "Year";
+        case OpenThermMessageID::TrSetCH2:
+            return "TrSetCH2";
+        case OpenThermMessageID::Tr:
+            return "Tr";
+        case OpenThermMessageID::Tboiler:
+            return "Tboiler";
+        case OpenThermMessageID::Tdhw:
+            return "Tdhw";
+        case OpenThermMessageID::Toutside:
+            return "Toutside";
+        case OpenThermMessageID::Tret:
+            return "Tret";
+        case OpenThermMessageID::Tstorage:
+            return "Tstorage";
+        case OpenThermMessageID::Tcollector:
+            return "Tcollector";
+        case OpenThermMessageID::TflowCH2:
+            return "TflowCH2";
+        case OpenThermMessageID::Tdhw2:
+            return "Tdhw2";
+        case OpenThermMessageID::Texhaust:
+            return "Texhaust";
+        case OpenThermMessageID::TdhwSetUBTdhwSetLB:
+            return "TdhwSetUBTdhwSetLB";
+        case OpenThermMessageID::MaxTSetUBMaxTSetLB:
+            return "MaxTSetUBMaxTSetLB";
+        case OpenThermMessageID::HcratioUBHcratioLB:
+            return "HcratioUBHcratioLB";
+        case OpenThermMessageID::TdhwSet:
+            return "TdhwSet";
+        case OpenThermMessageID::MaxTSet:
+            return "MaxTSet";
+        case OpenThermMessageID::Hcratio:
+            return "Hcratio";
+        case OpenThermMessageID::RemoteOverrideFunction:
+            return "RemoteOverrideFunction";
+        case OpenThermMessageID::OEMDiagnosticCode:
+            return "OEMDiagnosticCode";
+        case OpenThermMessageID::BurnerStarts:
+            return "BurnerStarts";
+        case OpenThermMessageID::CHPumpStarts:
+            return "CHPumpStarts";
+        case OpenThermMessageID::DHWPumpValveStarts:
+            return "DHWPumpValveStarts";
+        case OpenThermMessageID::DHWBurnerStarts:
+            return "DHWBurnerStarts";
+        case OpenThermMessageID::BurnerOperationHours:
+            return "BurnerOperationHours";
+        case OpenThermMessageID::CHPumpOperationHours:
+            return "CHPumpOperationHours";
+        case OpenThermMessageID::DHWPumpValveOperationHours:
+            return "DHWPumpValveOperationHours";
+        case OpenThermMessageID::DHWBurnerOperationHours:
+            return "DHWBurnerOperationHours";
+        case OpenThermMessageID::OpenThermVersionMaster:
+            return "OpenThermVersionMaster";
+        case OpenThermMessageID::OpenThermVersionSlave:
+            return "OpenThermVersionSlave";
+        case OpenThermMessageID::MasterVersion:
+            return "MasterVersion";
+        case OpenThermMessageID::SlaveVersion:
+            return "SlaveVersion";
+        default:
+            return "UNKNOWN";
+    }
+}
+
 const char *OpenTherm::messageTypeToString(OpenThermMessageType message_type)
 {
     switch (message_type)

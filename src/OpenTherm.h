@@ -195,6 +195,7 @@ public:
     static bool parity(unsigned long frame);
     static OpenThermMessageType getMessageType(unsigned long message);
     static OpenThermMessageID getDataID(unsigned long frame);
+    static const char *messageIDToString(OpenThermMessageID message_id);
     static const char *messageTypeToString(OpenThermMessageType message_type);
     static bool isValidRequest(unsigned long request);
     static bool isValidResponse(unsigned long response);
