@@ -4,7 +4,7 @@
 
 This library provides implementation of OpenTherm protocol.
 
-OpenTherm Library is based on OpenTherm protocol specification v2.2 and works with all OpenTherm compatible boilers. Library can be easily installed into Arduino IDE and compiled for Arduino, ESP8266 and other similar controllers. 
+OpenTherm Library is based on OpenTherm protocol specification v2.2 and works with all OpenTherm compatible boilers. Library can be easily installed into Arduino IDE and compiled for Arduino, ESP8266/ESP32 and other similar controllers. 
 
 OpenTherm protocol requires simple low voltage twowire connection to boiler, but voltage levels (7..15V) still much higher than Arduino/ESP8266 levels, which requires [OpenTherm Adapter](http://ihormelnyk.com/opentherm_adapter).
 
