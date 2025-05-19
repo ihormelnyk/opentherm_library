@@ -4,61 +4,127 @@ Copyright 2023, Ihor Melnyk
 */
 
 #include "OpenTherm.h"
-#if !defined(__AVR__)
-#include "FunctionalInterrupt.h"
-#endif
 
-OpenTherm::OpenTherm(int inPin, int outPin, bool isSlave) :
+OpenTherm::OpenTherm(int inPin, int outPin, bool isSlave, bool alwaysReceive) :
     status(OpenThermStatus::NOT_INITIALIZED),
     inPin(inPin),
     outPin(outPin),
     isSlave(isSlave),
+    alwaysReceive(alwaysReceive),
     response(0),
     responseStatus(OpenThermResponseStatus::NONE),
     responseTimestamp(0),
     processResponseCallback(NULL)
 {
+#if defined(SOC_GPTIMER_SUPPORTED) && SOC_GPTIMER_SUPPORTED
+    txTimer = NULL;
+    txIndex = 0;
+#endif
 }
 
-void OpenTherm::begin(void (*handleInterruptCallback)(void))
+bool OpenTherm::getAlwaysReceive()
 {
+    return alwaysReceive;
+}
+
+void OpenTherm::setAlwaysReceive(bool value)
+{
+    alwaysReceive = value;
+}
+
+bool OpenTherm::begin(void (*handleInterruptCallback)(void))
+{
+#if defined(SOC_GPTIMER_SUPPORTED) && SOC_GPTIMER_SUPPORTED
+    if (txTimer != NULL) {
+        return false;
+    }
+
+    gptimer_config_t tConfig = {
+        .clk_src = GPTIMER_CLK_SRC_DEFAULT,
+        .direction = GPTIMER_COUNT_UP,
+        .resolution_hz = 1000000, // 1 tick = 1 us
+    };
+    if (gptimer_new_timer(&tConfig, &txTimer) != ESP_OK)
+    {
+        txTimer = NULL;
+
+        return false;
+    }
+
+    gptimer_event_callbacks_t cbs = {
+        .on_alarm = OpenTherm::onTxTimer,
+    };
+    if (gptimer_register_event_callbacks(txTimer, &cbs, this) != ESP_OK)
+    {
+        gptimer_del_timer(txTimer);
+        txTimer = NULL;
+
+        return false;
+    }
+
+    if (gptimer_enable(txTimer) != ESP_OK)
+    {
+        gptimer_del_timer(txTimer);
+        txTimer = NULL;
+
+        return false;
+    }
+    
+    gptimer_alarm_config_t taConfig = {
+        .alarm_count = 500, // 500 us
+        .reload_count = 0,
+        .flags = { .auto_reload_on_alarm = 1 }
+    };
+    if (gptimer_set_alarm_action(txTimer, &taConfig) != ESP_OK)
+    {
+        gptimer_disable(txTimer);
+        gptimer_del_timer(txTimer);
+        txTimer = NULL;
+
+        return false;
+    }
+#endif
+
     pinMode(inPin, INPUT);
     pinMode(outPin, OUTPUT);
     if (handleInterruptCallback != NULL)
     {
         attachInterrupt(digitalPinToInterrupt(inPin), handleInterruptCallback, CHANGE);
     }
+#ifndef __AVR__
     else
     {
-#if !defined(__AVR__)
         attachInterruptArg(
             digitalPinToInterrupt(inPin),
             OpenTherm::handleInterruptHelper,
             this,
             CHANGE
         );
-#endif
     }
+#endif
+
     activateBoiler();
     status = OpenThermStatus::READY;
+
+    return true;
 }
 
-void OpenTherm::begin(void (*handleInterruptCallback)(void), void (*processResponseCallback)(unsigned long, OpenThermResponseStatus))
+bool OpenTherm::begin(void (*handleInterruptCallback)(void), void (*processResponseCallback)(unsigned long, OpenThermResponseStatus))
 {
-    begin(handleInterruptCallback);
     this->processResponseCallback = processResponseCallback;
+    return begin(handleInterruptCallback);
 }
 
-#if !defined(__AVR__)
-void OpenTherm::begin()
+#ifndef __AVR__
+bool OpenTherm::begin()
 {
-    begin(NULL);
+    return begin(NULL);
 }
 
-void OpenTherm::begin(std::function<void(unsigned long, OpenThermResponseStatus)> processResponseFunction)
+bool OpenTherm::begin(std::function<void(unsigned long, OpenThermResponseStatus)> processResponseFunction)
 {
-    begin();
     this->processResponseFunction = processResponseFunction;
+    return begin();
 }
 #endif
 
@@ -88,19 +154,101 @@ void OpenTherm::activateBoiler()
     delay(1000);
 }
 
+#if defined(SOC_GPTIMER_SUPPORTED) && SOC_GPTIMER_SUPPORTED
+bool IRAM_ATTR OpenTherm::onTxTimer(gptimer_handle_t timer, const gptimer_alarm_event_data_t *eData, void *uData)
+{
+    OpenTherm *self = static_cast<OpenTherm *>(uData);
+    if (self->txIndex < self->txBuffer.size())
+    {
+        if (self->txBuffer[self->txIndex])
+        {
+            self->setActiveState();
+        }
+        else
+        {
+            self->setIdleState();
+        }
+
+        self->txIndex = self->txIndex + 1;
+    }
+    else
+    {
+        gptimer_stop(timer);
+
+        self->setIdleState();
+        self->status = (self->isSlave || self->alwaysReceive) 
+            ? OpenThermStatus::READY 
+            : OpenThermStatus::RESPONSE_WAITING;
+        self->responseTimestamp = micros();
+        self->txIndex = 0;
+    }
+
+    return true;
+}
+
+void OpenTherm::sendFrame(const unsigned long request)
+{
+    size_t pos = 0;
+    txIndex = 0;
+    txBuffer.reset();
+
+    if (txTimer == NULL)
+    {
+        return;
+    }
+
+    // Start bit
+    txBuffer.set(pos++, true);
+    txBuffer.set(pos++, false);
+
+    // Frame
+    for (int i = 31; i >= 0; i--)
+    {
+        bool bit = bitRead(request, i);
+        txBuffer.set(pos++, bit);
+        txBuffer.set(pos++, !bit);
+    }
+
+    // Stop bit
+    txBuffer.set(pos++, true);
+    txBuffer.set(pos++, false);
+
+    gptimer_start(txTimer);
+}
+#else
 void OpenTherm::sendBit(bool high)
 {
     if (high)
+    {
         setActiveState();
-    else
+        delayMicroseconds(500);
         setIdleState();
-    delayMicroseconds(500);
-    if (high)
-        setIdleState();
+    }
     else
+    {
+        setIdleState();
+        delayMicroseconds(500);
         setActiveState();
+    }
+
     delayMicroseconds(500);
 }
+
+void OpenTherm::sendFrame(const unsigned long request)
+{
+    sendBit(HIGH); // start bit
+    for (int i = 31; i >= 0; i--)
+    {
+        sendBit(bitRead(request, i));
+    }
+    sendBit(HIGH); // stop bit
+    setIdleState();
+
+    status = (isSlave || alwaysReceive) 
+        ? OpenThermStatus::READY 
+        : OpenThermStatus::RESPONSE_WAITING;
+}
+#endif
 
 bool OpenTherm::sendRequestAsync(unsigned long request)
 {
@@ -117,32 +265,8 @@ bool OpenTherm::sendRequestAsync(unsigned long request)
     response = 0;
     responseStatus = OpenThermResponseStatus::NONE;
 
-#ifdef INC_FREERTOS_H
-    BaseType_t schedulerState = xTaskGetSchedulerState();
-    if (schedulerState == taskSCHEDULER_RUNNING)
-    {
-        vTaskSuspendAll();
-    }
-#endif
-
     interrupts();
-
-    sendBit(HIGH); // start bit
-    for (int i = 31; i >= 0; i--)
-    {
-        sendBit(bitRead(request, i));
-    }
-    sendBit(HIGH); // stop bit
-    setIdleState();
-
-    responseTimestamp = micros();
-    status = OpenThermStatus::RESPONSE_WAITING;
-
-#ifdef INC_FREERTOS_H
-    if (schedulerState == taskSCHEDULER_RUNNING) {
-        xTaskResumeAll();
-    }
-#endif
+    sendFrame(request);
 
     return true;
 }
@@ -177,30 +301,8 @@ bool OpenTherm::sendResponse(unsigned long request)
     response = 0;
     responseStatus = OpenThermResponseStatus::NONE;
 
-#ifdef INC_FREERTOS_H
-    BaseType_t schedulerState = xTaskGetSchedulerState();
-    if (schedulerState == taskSCHEDULER_RUNNING)
-    {
-        vTaskSuspendAll();
-    }
-#endif
-
     interrupts();
-
-    sendBit(HIGH); // start bit
-    for (int i = 31; i >= 0; i--)
-    {
-        sendBit(bitRead(request, i));
-    }
-    sendBit(HIGH); // stop bit
-    setIdleState();
-    status = OpenThermStatus::READY;
-
-#ifdef INC_FREERTOS_H
-    if (schedulerState == taskSCHEDULER_RUNNING) {
-        xTaskResumeAll();
-    }
-#endif
+    sendFrame(request);
 
     return true;
 }
@@ -217,9 +319,14 @@ OpenThermResponseStatus OpenTherm::getLastResponseStatus()
 
 void IRAM_ATTR OpenTherm::handleInterrupt()
 {
+    if (status == OpenThermStatus::REQUEST_SENDING)
+    {
+        return;
+    }
+
     if (isReady())
     {
-        if (isSlave && readState() == HIGH)
+        if ((isSlave || alwaysReceive) && readState() == HIGH)
         {
             status = OpenThermStatus::RESPONSE_WAITING;
         }
@@ -276,7 +383,7 @@ void IRAM_ATTR OpenTherm::handleInterrupt()
     }
 }
 
-#if !defined(__AVR__)
+#ifndef __AVR__
 void IRAM_ATTR OpenTherm::handleInterruptHelper(void* ptr)
 {
     static_cast<OpenTherm*>(ptr)->handleInterrupt();
@@ -289,7 +396,7 @@ void OpenTherm::processResponse()
     {
         processResponseCallback(response, responseStatus);
     }
-#if !defined(__AVR__)
+#ifndef __AVR__
     if (this->processResponseFunction != NULL)
     {
         processResponseFunction(response, responseStatus);
@@ -299,13 +406,21 @@ void OpenTherm::processResponse()
 
 void OpenTherm::process()
 {
+    if (status == OpenThermStatus::REQUEST_SENDING)
+    {
+        return;
+    }
+
     noInterrupts();
     OpenThermStatus st = status;
     unsigned long ts = responseTimestamp;
     interrupts();
 
     if (st == OpenThermStatus::READY)
+    {
         return;
+    }
+
     unsigned long newTs = micros();
     if (st != OpenThermStatus::NOT_INITIALIZED && st != OpenThermStatus::DELAY && (newTs - ts) > 1000000)
     {
@@ -340,7 +455,9 @@ bool OpenTherm::parity(unsigned long frame) // odd parity
     while (frame > 0)
     {
         if (frame & 1)
+        {
             p++;
+        }
         frame = frame >> 1;
     }
     return (p & 1);
@@ -366,7 +483,10 @@ unsigned long OpenTherm::buildRequest(OpenThermMessageType type, OpenThermMessag
     }
     request |= ((unsigned long)id) << 16;
     if (parity(request))
+    {
         request |= (1ul << 31);
+    }
+
     return request;
 }
 
@@ -376,14 +496,20 @@ unsigned long OpenTherm::buildResponse(OpenThermMessageType type, OpenThermMessa
     response |= ((unsigned long)type) << 28;
     response |= ((unsigned long)id) << 16;
     if (parity(response))
+    {
         response |= (1ul << 31);
+    }
+
     return response;
 }
 
 bool OpenTherm::isValidResponse(unsigned long response)
 {
     if (parity(response))
+    {
         return false;
+    }
+
     byte msgType = (response << 1) >> 29;
     return msgType == (byte)OpenThermMessageType::READ_ACK || msgType == (byte)OpenThermMessageType::WRITE_ACK;
 }
@@ -391,7 +517,10 @@ bool OpenTherm::isValidResponse(unsigned long response)
 bool OpenTherm::isValidRequest(unsigned long request)
 {
     if (parity(request))
+    {
         return false;
+    }
+
     byte msgType = (request << 1) >> 29;
     return msgType == (byte)OpenThermMessageType::READ_DATA || msgType == (byte)OpenThermMessageType::WRITE_DATA;
 }
@@ -399,6 +528,22 @@ bool OpenTherm::isValidRequest(unsigned long request)
 void OpenTherm::end()
 {
     detachInterrupt(digitalPinToInterrupt(inPin));
+    digitalWrite(outPin, LOW);
+
+    status = OpenThermStatus::NOT_INITIALIZED;
+    response = 0;
+    responseStatus = OpenThermResponseStatus::NONE;
+    responseTimestamp = 0;
+
+#if defined(SOC_GPTIMER_SUPPORTED) && SOC_GPTIMER_SUPPORTED
+    if (txTimer != NULL)
+    {
+        gptimer_stop(txTimer);
+        gptimer_disable(txTimer);
+        gptimer_del_timer(txTimer);
+        txTimer = NULL;
+    }
+#endif
 }
 
 OpenTherm::~OpenTherm()
@@ -450,11 +595,24 @@ const char *OpenTherm::messageTypeToString(OpenThermMessageType message_type)
 
 // building requests
 
-unsigned long OpenTherm::buildSetBoilerStatusRequest(bool enableCentralHeating, bool enableHotWater, bool enableCooling, bool enableOutsideTemperatureCompensation, bool enableCentralHeating2)
+unsigned long OpenTherm::buildSetBoilerStatusRequest(bool enableCentralHeating, bool enableHotWater, bool enableCooling, bool enableOutsideTemperatureCompensation, bool enableCentralHeating2, bool summerWinterMode, bool dhwBlocking, uint8_t lb)
 {
-    unsigned int data = enableCentralHeating | (enableHotWater << 1) | (enableCooling << 2) | (enableOutsideTemperatureCompensation << 3) | (enableCentralHeating2 << 4);
+    unsigned int data = enableCentralHeating
+        | (enableHotWater << 1)
+        | (enableCooling << 2)
+        | (enableOutsideTemperatureCompensation << 3)
+        | (enableCentralHeating2 << 4)
+        | (summerWinterMode << 5)
+        | (dhwBlocking << 6);
+
     data <<= 8;
-    return buildRequest(OpenThermMessageType::READ_DATA, OpenThermMessageID::Status, data);
+    data |= lb;
+
+    return buildRequest(
+        OpenThermMessageType::READ_DATA,
+        OpenThermMessageID::Status,
+        data
+    );
 }
 
 unsigned long OpenTherm::buildSetBoilerTemperatureRequest(float temperature)
@@ -515,18 +673,32 @@ float OpenTherm::getFloat(const unsigned long response)
 unsigned int OpenTherm::temperatureToData(float temperature)
 {
     if (temperature < 0)
+    {
         temperature = 0;
-    if (temperature > 100)
+    }
+    else if (temperature > 100)
+    {
         temperature = 100;
+    }
+
     unsigned int data = (unsigned int)(temperature * 256);
     return data;
 }
 
 // basic requests
 
-unsigned long OpenTherm::setBoilerStatus(bool enableCentralHeating, bool enableHotWater, bool enableCooling, bool enableOutsideTemperatureCompensation, bool enableCentralHeating2)
+unsigned long OpenTherm::setBoilerStatus(bool enableCentralHeating, bool enableHotWater, bool enableCooling, bool enableOutsideTemperatureCompensation, bool enableCentralHeating2, bool summerWinterMode, bool dhwBlocking, uint8_t lb)
 {
-    return sendRequest(buildSetBoilerStatusRequest(enableCentralHeating, enableHotWater, enableCooling, enableOutsideTemperatureCompensation, enableCentralHeating2));
+    return sendRequest(buildSetBoilerStatusRequest(
+        enableCentralHeating,
+        enableHotWater,
+        enableCooling,
+        enableOutsideTemperatureCompensation,
+        enableCentralHeating2,
+        summerWinterMode,
+        dhwBlocking,
+        lb
+    ));
 }
 
 bool OpenTherm::setBoilerTemperature(float temperature)

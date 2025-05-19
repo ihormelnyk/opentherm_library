@@ -16,6 +16,8 @@ OpenThermMessageID	KEYWORD1
 # Methods and Functions (KEYWORD2)
 #######################################
 
+getAlwaysReceive KEYWORD2
+setAlwaysReceive KEYWORD2
 begin	KEYWORD2
 isReady	KEYWORD2
 sendRequest	KEYWORD2
